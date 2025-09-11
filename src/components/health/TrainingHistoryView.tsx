@@ -171,6 +171,15 @@ const getIntensityColor = (intensity: string) => {
   }
 }
 
+const getIntensityText = (intensity: string) => {
+  switch (intensity) {
+    case 'low': return 'Lav'
+    case 'medium': return 'Medium'
+    case 'high': return 'Høj'
+    default: return intensity
+  }
+}
+
 const getTypeColor = (type: string) => {
   switch (type) {
     case 'biceps-triceps-mave': return 'bg-blue-100 text-blue-800'
@@ -377,18 +386,18 @@ export default function TrainingHistoryView({ mode }: TrainingHistoryViewProps) 
               <div className="bg-gray-50 rounded-lg p-4 text-center">
                 <Zap className="h-6 w-6 text-gray-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Kalorier</p>
-                <p className="text-lg font-semibold">{selectedTraining.calories || 'N/A'}</p>
+                <p className="text-lg font-semibold">{selectedTraining.calories || 'Ikke tilgængelig'}</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 text-center">
                 <Heart className="h-6 w-6 text-gray-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Gennemsnitlig HR</p>
-                <p className="text-lg font-semibold">{selectedTraining.heartRate?.avg || 'N/A'} bpm</p>
+                <p className="text-lg font-semibold">{selectedTraining.heartRate?.avg || 'Ikke tilgængelig'} bpm</p>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 text-center">
                 <Target className="h-6 w-6 text-gray-600 mx-auto mb-2" />
                 <p className="text-sm text-gray-600">Intensitet</p>
                 <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getIntensityColor(selectedTraining.intensity)}`}>
-                  {selectedTraining.intensity}
+                  {getIntensityText(selectedTraining.intensity)}
                 </span>
               </div>
             </div>
@@ -410,7 +419,7 @@ export default function TrainingHistoryView({ mode }: TrainingHistoryViewProps) 
                         <h4 className="font-medium text-gray-900">{exercise.name}</h4>
                         <div className="flex items-center space-x-4 text-sm text-gray-600">
                           <span>{exercise.sets} sæt</span>
-                          <span>{exercise.reps} reps</span>
+                          <span>{exercise.reps} gentagelser</span>
                           {exercise.weight && exercise.weight > 0 && (
                             <span>{exercise.weight} kg</span>
                           )}
@@ -498,7 +507,7 @@ export default function TrainingHistoryView({ mode }: TrainingHistoryViewProps) 
                   <div className="flex items-center space-x-4 text-sm text-gray-600">
                     <span>{training.duration} min</span>
                     <span className={`px-2 py-1 text-xs rounded-full ${getIntensityColor(training.intensity)}`}>
-                      {training.intensity}
+                      {getIntensityText(training.intensity)}
                     </span>
                   </div>
                 </div>
@@ -585,11 +594,11 @@ export default function TrainingHistoryView({ mode }: TrainingHistoryViewProps) 
                       {training.calories && (
                         <div className="flex items-center space-x-1">
                           <Zap className="h-4 w-4" />
-                          <span>{training.calories} cal</span>
+                          <span>{training.calories} kal</span>
                         </div>
                       )}
                       <span className={`px-2 py-1 text-xs rounded-full ${getIntensityColor(training.intensity)}`}>
-                        {training.intensity}
+                        {getIntensityText(training.intensity)}
                       </span>
                     </div>
                   </div>
