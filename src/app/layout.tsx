@@ -7,7 +7,7 @@ import { LanguageProvider } from '@/contexts/LanguageContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'LifeDash - Personal & Work Dashboard',
+  title: 'MyDashboard - Personal & Work Dashboard',
   description: 'Manage your daily tasks, track goals, and organize your life',
 }
 

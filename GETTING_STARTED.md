@@ -1,4 +1,4 @@
-# Getting Started with LifeDash
+# Getting Started with MyDashboard
 
 ## Quick Start Guide
 
@@ -17,7 +17,7 @@ npm run dev
 Navigate to: http://localhost:3000
 
 ### 4. Login with Demo Credentials
-- **Email**: admin@lifedash.com
+- **Email**: admin@mydashboard.com
 - **Password**: password123
 
 ## What You'll See
@@ -99,4 +99,4 @@ If you encounter any issues, check the console for error messages or create an i
 
 ---
 
-**Enjoy your new LifeDash application! 🚀**
+**Enjoy your new MyDashboard application! 🚀**
