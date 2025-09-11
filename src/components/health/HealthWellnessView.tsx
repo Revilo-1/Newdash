@@ -83,7 +83,7 @@ const sampleTrainingEvents: TrainingEvent[] = [
 const wellnessMetrics: WellnessMetric[] = [
   {
     id: '1',
-    title: 'Health & Wellness',
+    title: 'Sundhed & Velvære',
     value: '85%',
     change: '↑(+6%)',
     changeType: 'increase',
@@ -93,7 +93,7 @@ const wellnessMetrics: WellnessMetric[] = [
   },
   {
     id: '2',
-    title: 'Activity Level',
+    title: 'Aktivitetsniveau',
     value: '7.2K',
     change: '↑(+12%)',
     changeType: 'increase',
@@ -103,7 +103,7 @@ const wellnessMetrics: WellnessMetric[] = [
   },
   {
     id: '3',
-    title: 'Goals Achieved',
+    title: 'Mål Opnået',
     value: '24',
     change: '↑(+8%)',
     changeType: 'increase',
@@ -113,7 +113,7 @@ const wellnessMetrics: WellnessMetric[] = [
   },
   {
     id: '4',
-    title: 'Streak Days',
+    title: 'Streak Dage',
     value: '12',
     change: '↑(+3)',
     changeType: 'increase',
@@ -252,7 +252,7 @@ export default function HealthWellnessView({ mode }: HealthWellnessViewProps) {
           <li>
             <div className="flex items-center">
               <span className="text-gray-400">/</span>
-              <span className="ml-4 text-gray-500">Health & Wellness</span>
+              <span className="ml-4 text-gray-500">Sundhed & Velvære</span>
             </div>
           </li>
         </ol>
@@ -318,7 +318,7 @@ export default function HealthWellnessView({ mode }: HealthWellnessViewProps) {
       {/* Health & Wellness Chart */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Health & Wellness</h3>
+          <h3 className="text-lg font-semibold text-gray-900">Sundhed & Velvære</h3>
           <div className="text-right">
             <p className="text-2xl font-bold text-gray-900">85%</p>
             <p className="text-sm text-green-600">↑(+6%)</p>

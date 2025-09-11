@@ -364,10 +364,10 @@ export const translations: Record<Language, Translations> = {
       privateMode: 'Private',
       workMode: 'Work',
       kpiCards: {
-        healthWellness: 'Health & Wellness',
-        activityLevel: 'Activity Level',
-        goalsAchieved: 'Goals Achieved',
-        streakDays: 'Streak Days',
+        healthWellness: 'Sundhed & Velvære',
+        activityLevel: 'Aktivitetsniveau',
+        goalsAchieved: 'Mål Opnået',
+        streakDays: 'Streak Dage',
         revenue: 'Revenue',
         salesPerformance: 'Sales Performance',
         customerSatisfaction: 'Customer Satisfaction',
@@ -412,13 +412,13 @@ export const translations: Record<Language, Translations> = {
       }
     },
     healthWellness: {
-      title: 'Health & Wellness',
-      subtitle: 'Your journey to a healthier, happier you starts here. Track your progress, plan your training, and celebrate every milestone.',
+      title: 'Sundhed & Velvære',
+      subtitle: 'Din rejse mod et sundere og gladere liv starter her. Følg din fremgang, planlæg din træning og fejr hver milepæl.',
       metrics: {
-        healthWellness: 'Health & Wellness',
-        activityLevel: 'Activity Level',
-        goalsAchieved: 'Goals Achieved',
-        streakDays: 'Streak Days'
+        healthWellness: 'Sundhed & Velvære',
+        activityLevel: 'Aktivitetsniveau',
+        goalsAchieved: 'Mål Opnået',
+        streakDays: 'Streak Dage'
       },
       trainingCalendar: 'Training Calendar',
       addTraining: 'Add Training',
