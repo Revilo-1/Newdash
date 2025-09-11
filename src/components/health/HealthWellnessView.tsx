@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, ChevronLeft, ChevronRight, Plus, Heart, Activity, Target, TrendingUp, Clock, Flame, Droplets, Moon, Sun, History } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Plus, Heart, Activity, Target, TrendingUp, Clock, Flame, Droplets, Moon, Sun, History, Scale, PieChart, BarChart } from 'lucide-react'
 import { DashboardMode } from '@/types/dashboard'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -120,6 +120,36 @@ const wellnessMetrics: WellnessMetric[] = [
     icon: Flame,
     color: 'text-orange-500',
     bgColor: 'bg-orange-500'
+  },
+  {
+    id: '5',
+    title: 'Vægt',
+    value: '72.5 kg',
+    change: '↓(-1.2 kg)',
+    changeType: 'decrease',
+    icon: Scale,
+    color: 'text-indigo-500',
+    bgColor: 'bg-indigo-500'
+  },
+  {
+    id: '6',
+    title: 'Fedtprocent',
+    value: '18.2%',
+    change: '↓(-0.8%)',
+    changeType: 'decrease',
+    icon: PieChart,
+    color: 'text-pink-500',
+    bgColor: 'bg-pink-500'
+  },
+  {
+    id: '7',
+    title: 'BMI',
+    value: '22.1',
+    change: '↓(-0.3)',
+    changeType: 'decrease',
+    icon: BarChart,
+    color: 'text-teal-500',
+    bgColor: 'bg-teal-500'
   }
 ]
 
@@ -291,7 +321,7 @@ export default function HealthWellnessView({ mode }: HealthWellnessViewProps) {
       </div>
 
       {/* Wellness Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {wellnessMetrics.map((metric) => (
           <div key={metric.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between">

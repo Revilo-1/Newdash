@@ -368,6 +368,9 @@ export const translations: Record<Language, Translations> = {
         activityLevel: 'Aktivitetsniveau',
         goalsAchieved: 'Mål Opnået',
         streakDays: 'Streak Dage',
+        weight: 'Vægt',
+        bodyFat: 'Fedtprocent',
+        bmi: 'BMI',
         revenue: 'Revenue',
         salesPerformance: 'Sales Performance',
         customerSatisfaction: 'Customer Satisfaction',
@@ -418,7 +421,10 @@ export const translations: Record<Language, Translations> = {
         healthWellness: 'Sundhed & Velvære',
         activityLevel: 'Aktivitetsniveau',
         goalsAchieved: 'Mål Opnået',
-        streakDays: 'Streak Dage'
+        streakDays: 'Streak Dage',
+        weight: 'Vægt',
+        bodyFat: 'Fedtprocent',
+        bmi: 'BMI'
       },
       trainingCalendar: 'Training Calendar',
       addTraining: 'Add Training',
