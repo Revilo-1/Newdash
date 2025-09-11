@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, ChevronLeft, ChevronRight, Plus, Heart, Activity, Target, TrendingUp, Clock, Flame, Droplets, Moon, Sun } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Plus, Heart, Activity, Target, TrendingUp, Clock, Flame, Droplets, Moon, Sun, History } from 'lucide-react'
 import { DashboardMode } from '@/types/dashboard'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useLanguage } from '@/contexts/LanguageContext'
+import TrainingHistoryView from './TrainingHistoryView'
 
 interface HealthWellnessViewProps {
   mode: DashboardMode
@@ -146,6 +147,7 @@ export default function HealthWellnessView({ mode }: HealthWellnessViewProps) {
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [trainingEvents, setTrainingEvents] = useState(sampleTrainingEvents)
   const [showAddEvent, setShowAddEvent] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   const [newEvent, setNewEvent] = useState({
     title: '',
     type: 'biceps-triceps-mave' as const,
@@ -262,6 +264,30 @@ export default function HealthWellnessView({ mode }: HealthWellnessViewProps) {
         <p className="text-xl text-gray-600 max-w-2xl mx-auto">
           {t.healthWellness.subtitle}
         </p>
+        <div className="mt-6 flex justify-center space-x-4">
+          <button
+            onClick={() => setShowHistory(false)}
+            className={`px-6 py-3 rounded-lg font-medium ${
+              !showHistory 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <Activity className="h-5 w-5 inline mr-2" />
+            Nuværende Træning
+          </button>
+          <button
+            onClick={() => setShowHistory(true)}
+            className={`px-6 py-3 rounded-lg font-medium ${
+              showHistory 
+                ? 'bg-blue-600 text-white' 
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            <History className="h-5 w-5 inline mr-2" />
+            Træningshistorik
+          </button>
+        </div>
       </div>
 
       {/* Wellness Metrics */}
@@ -528,6 +554,11 @@ export default function HealthWellnessView({ mode }: HealthWellnessViewProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Training History View */}
+      {showHistory && (
+        <TrainingHistoryView mode={mode} />
       )}
     </div>
   )

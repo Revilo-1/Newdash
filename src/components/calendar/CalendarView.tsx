@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Calendar, ChevronLeft, ChevronRight, Plus, Settings } from 'lucide-react'
+import { Calendar, ChevronLeft, ChevronRight, Plus, Settings, History } from 'lucide-react'
 import { DashboardMode } from '@/types/dashboard'
 import { Calendar as BigCalendar, momentLocalizer } from 'react-big-calendar'
 import moment from 'moment'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
+import TrainingHistoryView from '../health/TrainingHistoryView'
 
 const localizer = momentLocalizer(moment)
 
@@ -28,6 +29,7 @@ interface CalendarEvent {
 export default function CalendarView({ mode }: CalendarViewProps) {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [showAddEvent, setShowAddEvent] = useState(false)
+  const [showTrainingHistory, setShowTrainingHistory] = useState(false)
   const [newEvent, setNewEvent] = useState({
     title: '',
     start: new Date(),
@@ -143,6 +145,19 @@ export default function CalendarView({ mode }: CalendarViewProps) {
           </p>
         </div>
         <div className="flex items-center space-x-3">
+          {mode === 'private' && (
+            <button
+              onClick={() => setShowTrainingHistory(!showTrainingHistory)}
+              className={`inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${
+                showTrainingHistory
+                  ? 'border-transparent text-white bg-primary-600 hover:bg-primary-700'
+                  : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'
+              }`}
+            >
+              <History className="h-4 w-4 mr-2" />
+              Træningshistorik
+            </button>
+          )}
           <button
             onClick={() => setShowAddEvent(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
@@ -264,6 +279,11 @@ export default function CalendarView({ mode }: CalendarViewProps) {
           </div>
         </div>
       </div>
+
+      {/* Training History View */}
+      {showTrainingHistory && (
+        <TrainingHistoryView mode={mode} />
+      )}
     </div>
   )
 }
