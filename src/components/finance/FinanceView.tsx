@@ -113,9 +113,9 @@ const initialStocks: Stock[] = [
     gak: 97.12,
     purchaseDate: '2024-01-15',
     currentPrice: 111.96,
-    marketValue: 64086,
-    profitLoss: 7884,
-    profitLossPercent: 14.03
+    marketValue: 10076.40, // 90 * 111.96
+    profitLoss: 1335.60, // 10076.40 - (90 * 97.12)
+    profitLossPercent: 15.28 // (1335.60 / (90 * 97.12)) * 100
   },
   {
     id: '2',
@@ -128,9 +128,9 @@ const initialStocks: Stock[] = [
     gak: 424.29,
     purchaseDate: '2024-02-20',
     currentPrice: 348.30,
-    marketValue: 24033,
-    profitLoss: -5244,
-    profitLossPercent: -17.91
+    marketValue: 24032.70, // 69 * 348.30
+    profitLoss: -5244.51, // 24032.70 - (69 * 424.29)
+    profitLossPercent: -17.91 // (-5244.51 / (69 * 424.29)) * 100
   },
   {
     id: '3',
@@ -143,9 +143,9 @@ const initialStocks: Stock[] = [
     gak: 351.53,
     purchaseDate: '2024-03-10',
     currentPrice: 348.30,
-    marketValue: 67918,
-    profitLoss: -630,
-    profitLossPercent: -0.92
+    marketValue: 67918.50, // 195 * 348.30
+    profitLoss: -629.85, // 67918.50 - (195 * 351.53)
+    profitLossPercent: -0.92 // (-629.85 / (195 * 351.53)) * 100
   },
   {
     id: '4',
@@ -158,9 +158,9 @@ const initialStocks: Stock[] = [
     gak: 4.37,
     purchaseDate: '2024-04-05',
     currentPrice: 9.07,
-    marketValue: 24228,
-    profitLoss: 12429,
-    profitLossPercent: 105.35
+    marketValue: 3809.40, // 420 * 9.07
+    profitLoss: 1974.00, // 3809.40 - (420 * 4.37)
+    profitLossPercent: 107.58 // (1974.00 / (420 * 4.37)) * 100
   }
 ]
 
@@ -214,28 +214,28 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const [purchaseDate, setPurchaseDate] = useState('')
   const [editingStock, setEditingStock] = useState<Stock | null>(null)
 
-  // Simulate real-time price updates
+  // Simulate real-time price updates (more realistic)
   useEffect(() => {
     const interval = setInterval(() => {
       setStocks(prevStocks => 
         prevStocks.map(stock => {
-          // Simulate small price changes
-          const change = (Math.random() - 0.5) * 0.02 // ±1% change
-          const newPrice = Math.max(0, stock.currentPrice + (stock.currentPrice * change))
+          // Much smaller, more realistic price changes (±0.1% to ±0.5%)
+          const change = (Math.random() - 0.5) * 0.01 // ±0.5% change
+          const newPrice = Math.max(0.01, stock.currentPrice + (stock.currentPrice * change))
           const newMarketValue = stock.shares * newPrice
           const newProfitLoss = newMarketValue - (stock.shares * stock.gak)
           const newProfitLossPercent = (newProfitLoss / (stock.shares * stock.gak)) * 100
           
           return {
             ...stock,
-            currentPrice: newPrice,
-            marketValue: newMarketValue,
-            profitLoss: newProfitLoss,
-            profitLossPercent: newProfitLossPercent
+            currentPrice: parseFloat(newPrice.toFixed(2)),
+            marketValue: parseFloat(newMarketValue.toFixed(2)),
+            profitLoss: parseFloat(newProfitLoss.toFixed(2)),
+            profitLossPercent: parseFloat(newProfitLossPercent.toFixed(2))
           }
         })
       )
-    }, 5000) // Update every 5 seconds
+    }, 10000) // Update every 10 seconds (less frequent)
 
     return () => clearInterval(interval)
   }, [])
@@ -268,20 +268,28 @@ export default function FinanceView({ mode }: FinanceViewProps) {
     }
 
     try {
-      const stockData = {
-        name: selectedStock.name,
-        symbol: selectedStock.symbol,
-        logo: '📈',
-        category: 'Custom',
-        categoryColor: 'bg-purple-500',
-        shares: parseInt(shares),
-        gak: parseFloat(gak),
-        purchase_date: purchaseDate,
-        current_price: selectedStock.price,
-        market_value: parseInt(shares) * selectedStock.price,
-        profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
-        profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
-      }
+        const sharesNum = parseInt(shares)
+        const gakNum = parseFloat(gak)
+        const currentPrice = selectedStock.price
+        const marketValue = sharesNum * currentPrice
+        const totalCost = sharesNum * gakNum
+        const profitLoss = marketValue - totalCost
+        const profitLossPercent = (profitLoss / totalCost) * 100
+
+        const stockData = {
+          name: selectedStock.name,
+          symbol: selectedStock.symbol,
+          logo: '📈',
+          category: 'Custom',
+          categoryColor: 'bg-purple-500',
+          shares: sharesNum,
+          gak: gakNum,
+          purchase_date: purchaseDate,
+          current_price: currentPrice,
+          market_value: parseFloat(marketValue.toFixed(2)),
+          profit_loss: parseFloat(profitLoss.toFixed(2)),
+          profit_loss_percent: parseFloat(profitLossPercent.toFixed(2))
+        }
 
       console.log('Saving stock data:', stockData)
       
@@ -302,10 +310,10 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           shares: stockData.shares,
           gak: stockData.gak,
           purchaseDate: stockData.purchase_date,
-          currentPrice: stockData.current_price,
-          marketValue: stockData.market_value,
-          profitLoss: stockData.profit_loss,
-          profitLossPercent: stockData.profit_loss_percent
+          currentPrice: parseFloat(stockData.current_price.toFixed(2)),
+          marketValue: parseFloat(stockData.market_value.toFixed(2)),
+          profitLoss: parseFloat(stockData.profit_loss.toFixed(2)),
+          profitLossPercent: parseFloat(stockData.profit_loss_percent.toFixed(2))
         }
         setStocks(prev => [newStock, ...prev])
         console.log('Stock added locally')
@@ -353,16 +361,24 @@ export default function FinanceView({ mode }: FinanceViewProps) {
     }
 
     try {
+      const sharesNum = parseInt(shares)
+      const gakNum = parseFloat(gak)
+      const currentPrice = selectedStock.price
+      const marketValue = sharesNum * currentPrice
+      const totalCost = sharesNum * gakNum
+      const profitLoss = marketValue - totalCost
+      const profitLossPercent = (profitLoss / totalCost) * 100
+
       const updates = {
         name: selectedStock.name,
         symbol: selectedStock.symbol,
-        shares: parseInt(shares),
-        gak: parseFloat(gak),
+        shares: sharesNum,
+        gak: gakNum,
         purchase_date: purchaseDate,
-        current_price: selectedStock.price,
-        market_value: parseInt(shares) * selectedStock.price,
-        profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
-        profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
+        current_price: currentPrice,
+        market_value: parseFloat(marketValue.toFixed(2)),
+        profit_loss: parseFloat(profitLoss.toFixed(2)),
+        profit_loss_percent: parseFloat(profitLossPercent.toFixed(2))
       }
 
       console.log('Updating stock with data:', updates)
@@ -381,10 +397,10 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           shares: updates.shares,
           gak: updates.gak,
           purchaseDate: updates.purchase_date,
-          currentPrice: updates.current_price,
-          marketValue: updates.market_value,
-          profitLoss: updates.profit_loss,
-          profitLossPercent: updates.profit_loss_percent
+          currentPrice: parseFloat(updates.current_price.toFixed(2)),
+          marketValue: parseFloat(updates.market_value.toFixed(2)),
+          profitLoss: parseFloat(updates.profit_loss.toFixed(2)),
+          profitLossPercent: parseFloat(updates.profit_loss_percent.toFixed(2))
         }
         setStocks(prev => prev.map(stock => stock.id === editingStock.id ? updatedStock : stock))
         console.log('Stock updated locally')
