@@ -1,5 +1,6 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { DatabaseService } from './database'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,10 +17,27 @@ export const authOptions: NextAuthOptions = {
 
         // Demo user - simple check for demo purposes
         if (credentials.email === 'demoen@outlook.dk' && credentials.password === 'password123') {
-          return {
-            id: '1',
-            email: 'demoen@outlook.dk',
-            name: 'Demo User',
+          try {
+            // Check if user exists in database, create if not
+            let user = await DatabaseService.getUserByEmail(credentials.email)
+            
+            if (!user) {
+              user = await DatabaseService.createUser(credentials.email, 'Demo User')
+            }
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+            }
+          } catch (error) {
+            console.error('Database error during login:', error)
+            // Fallback to demo user without database
+            return {
+              id: '550e8400-e29b-41d4-a716-446655440000',
+              email: 'demoen@outlook.dk',
+              name: 'Demo User',
+            }
           }
         }
 

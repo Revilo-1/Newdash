@@ -25,6 +25,7 @@ import {
 } from 'lucide-react'
 import { DashboardMode } from '@/types/dashboard'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useUserData } from '@/hooks/useUserData'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 interface FinanceViewProps {
@@ -209,8 +210,31 @@ const mockSearchResults: SearchResult[] = [
 
 export default function FinanceView({ mode }: FinanceViewProps) {
   const { t } = useLanguage()
+  const { stocks: dbStocks, saveStock, updateStock, deleteStock, loading, error } = useUserData()
   const [selectedTimeframe, setSelectedTimeframe] = useState('1Y')
   const [stocks, setStocks] = useState<Stock[]>(initialStocks)
+  
+  // Update stocks when database data changes
+  useEffect(() => {
+    if (dbStocks && dbStocks.length > 0) {
+      const formattedStocks = dbStocks.map(stock => ({
+        id: stock.id,
+        name: stock.name,
+        symbol: stock.symbol,
+        logo: stock.logo || '📈',
+        category: stock.category || 'Custom',
+        categoryColor: stock.categoryColor || 'bg-purple-500',
+        shares: stock.shares,
+        gak: stock.gak,
+        purchaseDate: stock.purchase_date,
+        currentPrice: stock.current_price,
+        marketValue: stock.market_value,
+        profitLoss: stock.profit_loss,
+        profitLossPercent: stock.profit_loss_percent
+      }))
+      setStocks(formattedStocks)
+    }
+  }, [dbStocks])
   const [showAddModal, setShowAddModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -265,36 +289,43 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const totalProfitLossPercent = (totalProfitLoss / (totalPortfolioValue - totalProfitLoss)) * 100
 
   // Stock management functions
-  const handleAddStock = () => {
+  const handleAddStock = async () => {
     if (selectedStock && shares && gak && purchaseDate) {
-      const newStock: Stock = {
-        id: Date.now().toString(),
-        name: selectedStock.name,
-        symbol: selectedStock.symbol,
-        logo: '📈',
-        category: 'Custom',
-        categoryColor: 'bg-purple-500',
-        shares: parseInt(shares),
-        gak: parseFloat(gak),
-        purchaseDate: purchaseDate,
-        currentPrice: selectedStock.price,
-        marketValue: parseInt(shares) * selectedStock.price,
-        profitLoss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
-        profitLossPercent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
+      try {
+        const stockData = {
+          name: selectedStock.name,
+          symbol: selectedStock.symbol,
+          logo: '📈',
+          category: 'Custom',
+          categoryColor: 'bg-purple-500',
+          shares: parseInt(shares),
+          gak: parseFloat(gak),
+          purchase_date: purchaseDate,
+          current_price: selectedStock.price,
+          market_value: parseInt(shares) * selectedStock.price,
+          profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
+          profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
+        }
+
+        await saveStock(stockData)
+        setShowAddModal(false)
+        setSearchQuery('')
+        setSelectedStock(null)
+        setShares('')
+        setGak('')
+        setPurchaseDate('')
+      } catch (error) {
+        console.error('Error adding stock:', error)
       }
-      
-      setStocks([...stocks, newStock])
-      setShowAddModal(false)
-      setSearchQuery('')
-      setSelectedStock(null)
-      setShares('')
-      setGak('')
-      setPurchaseDate('')
     }
   }
 
-  const handleDeleteStock = (id: string) => {
-    setStocks(stocks.filter(stock => stock.id !== id))
+  const handleDeleteStock = async (id: string) => {
+    try {
+      await deleteStock(id)
+    } catch (error) {
+      console.error('Error deleting stock:', error)
+    }
   }
 
   const handleEditStock = (stock: Stock) => {
@@ -306,29 +337,32 @@ export default function FinanceView({ mode }: FinanceViewProps) {
     setShowAddModal(true)
   }
 
-  const handleUpdateStock = () => {
+  const handleUpdateStock = async () => {
     if (editingStock && selectedStock && shares && gak && purchaseDate) {
-      const updatedStock: Stock = {
-        ...editingStock,
-        name: selectedStock.name,
-        symbol: selectedStock.symbol,
-        shares: parseInt(shares),
-        gak: parseFloat(gak),
-        purchaseDate: purchaseDate,
-        currentPrice: selectedStock.price,
-        marketValue: parseInt(shares) * selectedStock.price,
-        profitLoss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
-        profitLossPercent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
+      try {
+        const updates = {
+          name: selectedStock.name,
+          symbol: selectedStock.symbol,
+          shares: parseInt(shares),
+          gak: parseFloat(gak),
+          purchase_date: purchaseDate,
+          current_price: selectedStock.price,
+          market_value: parseInt(shares) * selectedStock.price,
+          profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
+          profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
+        }
+
+        await updateStock(editingStock.id, updates)
+        setShowAddModal(false)
+        setEditingStock(null)
+        setSearchQuery('')
+        setSelectedStock(null)
+        setShares('')
+        setGak('')
+        setPurchaseDate('')
+      } catch (error) {
+        console.error('Error updating stock:', error)
       }
-      
-      setStocks(stocks.map(stock => stock.id === editingStock.id ? updatedStock : stock))
-      setShowAddModal(false)
-      setEditingStock(null)
-      setSearchQuery('')
-      setSelectedStock(null)
-      setShares('')
-      setGak('')
-      setPurchaseDate('')
     }
   }
 
