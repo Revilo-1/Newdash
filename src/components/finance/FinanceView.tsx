@@ -58,18 +58,18 @@ interface SearchResult {
 
 // Mock Nordnet portfolio data
 const portfolioData = [
-  { month: 'Jan', amount: 180000 },
-  { month: 'Feb', amount: 185000 },
-  { month: 'Mar', amount: 182000 },
-  { month: 'Apr', amount: 190000 },
-  { month: 'May', amount: 195000 },
-  { month: 'Jun', amount: 192000 },
-  { month: 'Jul', amount: 200000 },
-  { month: 'Aug', amount: 198000 },
-  { month: 'Sep', amount: 205000 },
-  { month: 'Oct', amount: 202000 },
-  { month: 'Nov', amount: 210000 },
-  { month: 'Dec', amount: 188408 }
+  { month: 'Jan', amount: 170000 },
+  { month: 'Feb', amount: 175000 },
+  { month: 'Mar', amount: 172000 },
+  { month: 'Apr', amount: 180000 },
+  { month: 'May', amount: 185000 },
+  { month: 'Jun', amount: 182000 },
+  { month: 'Jul', amount: 190000 },
+  { month: 'Aug', amount: 188000 },
+  { month: 'Sep', amount: 195000 },
+  { month: 'Oct', amount: 192000 },
+  { month: 'Nov', amount: 200000 },
+  { month: 'Dec', amount: 180265 }
 ]
 
 // Sample upcoming payments
@@ -104,18 +104,18 @@ const upcomingPayments = [
 const initialStocks: Stock[] = [
   {
     id: '1',
-    name: 'Tesla',
-    symbol: 'TSLA',
-    logo: '🚗',
-    category: 'Automotive',
-    categoryColor: 'bg-red-500',
-    shares: 178,
-    gak: 322.96,
+    name: 'CoreWeave',
+    symbol: 'CW',
+    logo: '☁️',
+    category: 'Cloud Computing',
+    categoryColor: 'bg-blue-500',
+    shares: 90,
+    gak: 97.12,
     purchaseDate: '2024-01-15',
-    currentPrice: 395.94,
-    marketValue: 70510,
-    profitLoss: 11848,
-    profitLossPercent: 20.20
+    currentPrice: 111.96,
+    marketValue: 64086,
+    profitLoss: 7884,
+    profitLossPercent: 14.03
   },
   {
     id: '2',
@@ -123,29 +123,29 @@ const initialStocks: Stock[] = [
     symbol: 'NOVO-B',
     logo: '💊',
     category: 'Healthcare',
-    categoryColor: 'bg-blue-500',
+    categoryColor: 'bg-blue-600',
     shares: 69,
-    gak: 351.53,
+    gak: 424.29,
     purchaseDate: '2024-02-20',
     currentPrice: 348.30,
-    marketValue: 67919,
-    profitLoss: -630,
-    profitLossPercent: -0.92
+    marketValue: 24033,
+    profitLoss: -5244,
+    profitLossPercent: -17.91
   },
   {
     id: '3',
-    name: 'Zealand Pharma A/S',
-    symbol: 'ZEAL',
-    logo: '🧬',
+    name: 'Novo Nordisk B A/S',
+    symbol: 'NOVO-B-2',
+    logo: '💊',
     category: 'Healthcare',
     categoryColor: 'bg-blue-600',
-    shares: 110,
-    gak: 441.15,
+    shares: 195,
+    gak: 351.53,
     purchaseDate: '2024-03-10',
-    currentPrice: 412.40,
-    marketValue: 45364,
-    profitLoss: -3162,
-    profitLossPercent: -6.52
+    currentPrice: 348.30,
+    marketValue: 67918,
+    profitLoss: -630,
+    profitLossPercent: -0.92
   },
   {
     id: '4',
@@ -154,28 +154,28 @@ const initialStocks: Stock[] = [
     logo: '🏠',
     category: 'Real Estate',
     categoryColor: 'bg-blue-700',
-    shares: 509,
-    gak: 9.77,
+    shares: 420,
+    gak: 4.37,
     purchaseDate: '2024-04-05',
     currentPrice: 9.07,
-    marketValue: 4615,
-    profitLoss: -366,
-    profitLossPercent: -7.35
+    marketValue: 24228,
+    profitLoss: 12429,
+    profitLossPercent: 105.35
   }
 ]
 
 // Mock search results for stock search
 const mockSearchResults: SearchResult[] = [
-  { symbol: 'TSLA', name: 'Tesla', price: 395.94, change: 27.12, changePercent: 7.36 },
+  { symbol: 'CW', name: 'CoreWeave', price: 111.96, change: -0.73, changePercent: -0.65 },
   { symbol: 'NOVO-B', name: 'Novo Nordisk B A/S', price: 348.30, change: 2.40, changePercent: 0.69 },
-  { symbol: 'ZEAL', name: 'Zealand Pharma A/S', price: 412.40, change: -17.80, changePercent: -4.14 },
   { symbol: 'OPEN', name: 'Opendoor Technologies', price: 9.07, change: -1.45, changePercent: -13.78 },
+  { symbol: 'TSLA', name: 'Tesla', price: 395.94, change: 27.12, changePercent: 7.36 },
+  { symbol: 'ZEAL', name: 'Zealand Pharma A/S', price: 412.40, change: -17.80, changePercent: -4.14 },
   { symbol: 'MAERSK-B', name: 'A.P. Møller - Mærsk', price: 12450, change: -180, changePercent: -1.43 },
   { symbol: 'DSV', name: 'DSV', price: 1250, change: 25, changePercent: 2.04 },
   { symbol: 'ORSTED', name: 'Ørsted', price: 426, change: -8, changePercent: -1.84 },
   { symbol: 'CARL-B', name: 'Carlsberg', price: 980, change: 15, changePercent: 1.55 },
-  { symbol: 'VWS', name: 'Vestas Wind Systems', price: 185.5, change: 3.2, changePercent: 1.75 },
-  { symbol: 'DANSKE', name: 'Danske Bank', price: 185, change: 2.5, changePercent: 1.37 }
+  { symbol: 'VWS', name: 'Vestas Wind Systems', price: 185.5, change: 3.2, changePercent: 1.75 }
 ]
 
 export default function FinanceView({ mode }: FinanceViewProps) {
