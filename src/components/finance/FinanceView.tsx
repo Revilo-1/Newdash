@@ -70,7 +70,7 @@ const portfolioData = [
   { month: 'Sep', amount: 205000 },
   { month: 'Oct', amount: 202000 },
   { month: 'Nov', amount: 210000 },
-  { month: 'Dec', amount: 189152 } // Current actual portfolio value in DKK
+  { month: 'Dec', amount: 321541 } // Current actual portfolio value in DKK
 ]
 
 // Sample upcoming payments
@@ -101,11 +101,59 @@ const upcomingPayments = [
   }
 ]
 
-// Oliver's real stock holdings from Nordnet
-// Note: CoreWeave and Opendoor are USD stocks, Novo Nordisk is DKK
+// Oliver's real stock holdings from Nordnet - updated with actual values
+// Note: CoreWeave, Opendoor, and Tesla are USD stocks, Novo Nordisk and Zealand Pharma are DKK
 const initialStocks: Stock[] = [
   {
     id: '1',
+    name: 'Zealand Pharma A/S',
+    symbol: 'ZEAL',
+    logo: '📈',
+    category: 'Custom',
+    categoryColor: 'bg-purple-500',
+    shares: 110,
+    gak: 441,
+    purchaseDate: '2024-01-15',
+    currentPrice: 421.90,
+    marketValue: 46409.05,
+    profitLoss: -2100.95,
+    profitLossPercent: -4.33,
+    currency: 'DKK'
+  },
+  {
+    id: '2',
+    name: 'Opendoor Technologies',
+    symbol: 'OPEN',
+    logo: '📈',
+    category: 'Custom',
+    categoryColor: 'bg-purple-500',
+    shares: 80,
+    gak: 9.77,
+    purchaseDate: '2024-02-20',
+    currentPrice: 9.28,
+    marketValue: 742.43,
+    profitLoss: -39.17,
+    profitLossPercent: -5.01,
+    currency: 'USD'
+  },
+  {
+    id: '3',
+    name: 'Tesla',
+    symbol: 'TSLA',
+    logo: '📈',
+    category: 'Custom',
+    categoryColor: 'bg-purple-500',
+    shares: 28,
+    gak: 323,
+    purchaseDate: '2024-03-10',
+    currentPrice: 402.41,
+    marketValue: 11267.35,
+    profitLoss: 2223.35,
+    profitLossPercent: 24.58,
+    currency: 'USD'
+  },
+  {
+    id: '4',
     name: 'CoreWeave',
     symbol: 'CW',
     logo: '☁️',
@@ -113,15 +161,15 @@ const initialStocks: Stock[] = [
     categoryColor: 'bg-blue-500',
     shares: 90,
     gak: 97.12,
-    purchaseDate: '2024-01-15',
-    currentPrice: 111.96,
-    marketValue: 10076.40,
-    profitLoss: 1335.60,
-    profitLossPercent: 15.28,
+    purchaseDate: '2024-04-05',
+    currentPrice: 113.07,
+    marketValue: 10176.50,
+    profitLoss: 1435.70,
+    profitLossPercent: 16.43,
     currency: 'USD'
   },
   {
-    id: '2',
+    id: '5',
     name: 'Novo Nordisk B A/S',
     symbol: 'NOVO-B',
     logo: '💊',
@@ -129,15 +177,15 @@ const initialStocks: Stock[] = [
     categoryColor: 'bg-blue-600',
     shares: 69,
     gak: 424.29,
-    purchaseDate: '2024-02-20',
-    currentPrice: 348.30,
-    marketValue: 24032.70,
-    profitLoss: -5244.51,
-    profitLossPercent: -17.91,
+    purchaseDate: '2024-05-10',
+    currentPrice: 358.23,
+    marketValue: 24717.65,
+    profitLoss: -4558.36,
+    profitLossPercent: -15.57,
     currency: 'DKK'
   },
   {
-    id: '3',
+    id: '6',
     name: 'Novo Nordisk B A/S',
     symbol: 'NOVO-B-2',
     logo: '💊',
@@ -145,27 +193,27 @@ const initialStocks: Stock[] = [
     categoryColor: 'bg-blue-600',
     shares: 195,
     gak: 351.53,
-    purchaseDate: '2024-03-10',
-    currentPrice: 348.30,
-    marketValue: 67918.50,
-    profitLoss: -629.85,
-    profitLossPercent: -0.92,
+    purchaseDate: '2024-06-15',
+    currentPrice: 353.40,
+    marketValue: 68912.95,
+    profitLoss: 364.60,
+    profitLossPercent: 0.53,
     currency: 'DKK'
   },
   {
-    id: '4',
+    id: '7',
     name: 'Opendoor Technologies',
-    symbol: 'OPEN',
+    symbol: 'OPEN-2',
     logo: '🏠',
     category: 'Real Estate',
     categoryColor: 'bg-blue-700',
     shares: 420,
     gak: 4.37,
-    purchaseDate: '2024-04-05',
-    currentPrice: 9.07,
-    marketValue: 3809.40,
-    profitLoss: 1974.00,
-    profitLossPercent: 107.58,
+    purchaseDate: '2024-07-20',
+    currentPrice: 8.91,
+    marketValue: 3742.44,
+    profitLoss: 1907.04,
+    profitLossPercent: 103.90,
     currency: 'USD'
   }
 ]
