@@ -290,71 +290,71 @@ export default function HealthWellnessView({ mode }: HealthWellnessViewProps) {
 
       {/* Page Title */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">{t.healthWellness.title}</h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">{t.healthWellness.title}</h1>
+        <p className="text-base sm:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
           {t.healthWellness.subtitle}
         </p>
-        <div className="mt-6 flex justify-center space-x-4">
+        <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 px-4">
           <button
             onClick={() => setShowHistory(false)}
-            className={`px-6 py-3 rounded-lg font-medium ${
+            className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium text-sm sm:text-base ${
               !showHistory 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <Activity className="h-5 w-5 inline mr-2" />
+            <Activity className="h-4 w-4 sm:h-5 sm:w-5 inline mr-2" />
             Nuværende Træning
           </button>
           <button
             onClick={() => setShowHistory(true)}
-            className={`px-6 py-3 rounded-lg font-medium ${
+            className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium text-sm sm:text-base ${
               showHistory 
                 ? 'bg-blue-600 text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <History className="h-5 w-5 inline mr-2" />
+            <History className="h-4 w-4 sm:h-5 sm:w-5 inline mr-2" />
             Træningshistorik
           </button>
         </div>
       </div>
 
       {/* Wellness Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         {wellnessMetrics.map((metric) => (
-          <div key={metric.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div key={metric.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600 mb-1">{metric.title}</p>
-                <p className="text-2xl font-bold text-gray-900">{metric.value}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 mb-1 truncate">{metric.title}</p>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 truncate">{metric.value}</p>
               </div>
-              <div className={`p-3 rounded-full ${metric.bgColor}`}>
-                <metric.icon className="h-6 w-6 text-white" />
+              <div className={`p-2 sm:p-3 rounded-full ${metric.bgColor} flex-shrink-0 ml-3`}>
+                <metric.icon className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white" />
               </div>
             </div>
-            <div className="mt-4 flex items-center">
-              <span className={`text-sm font-medium ${
+            <div className="mt-3 sm:mt-4 flex items-center">
+              <span className={`text-xs sm:text-sm font-medium ${
                 metric.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
               }`}>
                 {metric.change}
               </span>
-              <span className="text-sm text-gray-500 ml-2">vs last month</span>
+              <span className="text-xs sm:text-sm text-gray-500 ml-2 hidden sm:inline">vs last month</span>
             </div>
           </div>
         ))}
       </div>
 
       {/* Health & Wellness Chart */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">Sundhed & Velvære</h3>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-gray-900">85%</p>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-2 sm:space-y-0">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Sundhed & Velvære</h3>
+          <div className="text-left sm:text-right">
+            <p className="text-xl sm:text-2xl font-bold text-gray-900">85%</p>
             <p className="text-sm text-green-600">↑(+6%)</p>
           </div>
         </div>
-        <div className="h-64">
+        <div className="h-48 sm:h-64">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={wellnessData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />

@@ -14,6 +14,7 @@ import {
 import Link from 'next/link'
 import { DashboardMode } from '@/types/dashboard'
 import { useLanguage } from '@/contexts/LanguageContext'
+import MobileNavigation from './MobileNavigation'
 
 interface HeaderProps {
   dashboardMode: DashboardMode
@@ -39,36 +40,42 @@ export default function Header({ dashboardMode, onModeChange }: HeaderProps) {
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Left side - Welcome message */}
-          <div className="flex items-center">
-            <h1 className="text-xl font-semibold text-gray-900">
+          {/* Left side - Mobile menu + Welcome message */}
+          <div className="flex items-center space-x-4">
+            <MobileNavigation dashboardMode={dashboardMode} />
+            <h1 className="text-lg sm:text-xl font-semibold text-gray-900 hidden sm:block">
               {t.dashboard.welcome} {session?.user?.name}! 👋
+            </h1>
+            <h1 className="text-lg font-semibold text-gray-900 sm:hidden">
+              MyDashboard
             </h1>
           </div>
           
           {/* Right side - Controls */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Dashboard Mode Toggle */}
             <div className="flex items-center bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => onModeChange('private')}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors ${
                   dashboardMode === 'private'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {t.dashboard.privateMode}
+                <span className="hidden sm:inline">{t.dashboard.privateMode}</span>
+                <span className="sm:hidden">Priv</span>
               </button>
               <button
                 onClick={() => onModeChange('work')}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors ${
                   dashboardMode === 'work'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                {t.dashboard.workMode}
+                <span className="hidden sm:inline">{t.dashboard.workMode}</span>
+                <span className="sm:hidden">Work</span>
               </button>
             </div>
 
