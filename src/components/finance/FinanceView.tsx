@@ -58,18 +58,18 @@ interface SearchResult {
 
 // Mock Nordnet portfolio data
 const portfolioData = [
-  { month: 'Jan', amount: 285000 },
-  { month: 'Feb', amount: 292000 },
-  { month: 'Mar', amount: 278000 },
-  { month: 'Apr', amount: 295000 },
-  { month: 'May', amount: 305000 },
-  { month: 'Jun', amount: 300000 },
-  { month: 'Jul', amount: 312000 },
-  { month: 'Aug', amount: 308000 },
-  { month: 'Sep', amount: 325000 },
-  { month: 'Oct', amount: 318000 },
-  { month: 'Nov', amount: 332000 },
-  { month: 'Dec', amount: 328000 }
+  { month: 'Jan', amount: 180000 },
+  { month: 'Feb', amount: 185000 },
+  { month: 'Mar', amount: 182000 },
+  { month: 'Apr', amount: 190000 },
+  { month: 'May', amount: 195000 },
+  { month: 'Jun', amount: 192000 },
+  { month: 'Jul', amount: 200000 },
+  { month: 'Aug', amount: 198000 },
+  { month: 'Sep', amount: 205000 },
+  { month: 'Oct', amount: 202000 },
+  { month: 'Nov', amount: 210000 },
+  { month: 'Dec', amount: 188408 }
 ]
 
 // Sample upcoming payments
@@ -100,112 +100,82 @@ const upcomingPayments = [
   }
 ]
 
-// Mock Danish stock holdings with full data
+// Oliver's real stock holdings from Nordnet
 const initialStocks: Stock[] = [
   {
     id: '1',
-    name: 'Novo Nordisk',
+    name: 'Tesla',
+    symbol: 'TSLA',
+    logo: '🚗',
+    category: 'Automotive',
+    categoryColor: 'bg-red-500',
+    shares: 178,
+    gak: 322.96,
+    purchaseDate: '2024-01-15',
+    currentPrice: 395.94,
+    marketValue: 70510,
+    profitLoss: 11848,
+    profitLossPercent: 20.20
+  },
+  {
+    id: '2',
+    name: 'Novo Nordisk B A/S',
     symbol: 'NOVO-B',
     logo: '💊',
     category: 'Healthcare',
     categoryColor: 'bg-blue-500',
-    shares: 50,
-    gak: 800,
-    purchaseDate: '2024-01-15',
-    currentPrice: 850,
-    marketValue: 42500,
-    profitLoss: 2500,
-    profitLossPercent: 6.25
-  },
-  {
-    id: '2',
-    name: 'A.P. Møller - Mærsk',
-    symbol: 'MAERSK-B',
-    logo: '🚢',
-    category: 'Transportation',
-    categoryColor: 'bg-orange-500',
-    shares: 8,
-    gak: 13000,
+    shares: 69,
+    gak: 351.53,
     purchaseDate: '2024-02-20',
-    currentPrice: 12450,
-    marketValue: 99600,
-    profitLoss: -4400,
-    profitLossPercent: -4.23
+    currentPrice: 348.30,
+    marketValue: 67919,
+    profitLoss: -630,
+    profitLossPercent: -0.92
   },
   {
     id: '3',
-    name: 'DSV',
-    symbol: 'DSV',
-    logo: '📦',
-    category: 'Transportation',
-    categoryColor: 'bg-green-500',
-    shares: 40,
-    gak: 1200,
+    name: 'Zealand Pharma A/S',
+    symbol: 'ZEAL',
+    logo: '🧬',
+    category: 'Healthcare',
+    categoryColor: 'bg-blue-600',
+    shares: 110,
+    gak: 441.15,
     purchaseDate: '2024-03-10',
-    currentPrice: 1250,
-    marketValue: 50000,
-    profitLoss: 2000,
-    profitLossPercent: 4.17
+    currentPrice: 412.40,
+    marketValue: 45364,
+    profitLoss: -3162,
+    profitLossPercent: -6.52
   },
   {
     id: '4',
-    name: 'Ørsted',
-    symbol: 'ORSTED',
-    logo: '🌱',
-    category: 'Energy',
-    categoryColor: 'bg-emerald-500',
-    shares: 100,
-    gak: 450,
+    name: 'Opendoor Technologies',
+    symbol: 'OPEN',
+    logo: '🏠',
+    category: 'Real Estate',
+    categoryColor: 'bg-blue-700',
+    shares: 509,
+    gak: 9.77,
     purchaseDate: '2024-04-05',
-    currentPrice: 426,
-    marketValue: 42600,
-    profitLoss: -2400,
-    profitLossPercent: -5.33
-  },
-  {
-    id: '5',
-    name: 'Carlsberg',
-    symbol: 'CARL-B',
-    logo: '🍺',
-    category: 'Consumer Goods',
-    categoryColor: 'bg-amber-500',
-    shares: 30,
-    gak: 950,
-    purchaseDate: '2024-05-12',
-    currentPrice: 980,
-    marketValue: 29400,
-    profitLoss: 900,
-    profitLossPercent: 3.16
-  },
-  {
-    id: '6',
-    name: 'Vestas Wind Systems',
-    symbol: 'VWS',
-    logo: '🌪️',
-    category: 'Energy',
-    categoryColor: 'bg-teal-500',
-    shares: 200,
-    gak: 180,
-    purchaseDate: '2024-06-01',
-    currentPrice: 185.5,
-    marketValue: 37100,
-    profitLoss: 1100,
-    profitLossPercent: 3.06
+    currentPrice: 9.07,
+    marketValue: 4615,
+    profitLoss: -366,
+    profitLossPercent: -7.35
   }
 ]
 
 // Mock search results for stock search
 const mockSearchResults: SearchResult[] = [
-  { symbol: 'NOVO-B', name: 'Novo Nordisk', price: 850, change: 12, changePercent: 1.43 },
+  { symbol: 'TSLA', name: 'Tesla', price: 395.94, change: 27.12, changePercent: 7.36 },
+  { symbol: 'NOVO-B', name: 'Novo Nordisk B A/S', price: 348.30, change: 2.40, changePercent: 0.69 },
+  { symbol: 'ZEAL', name: 'Zealand Pharma A/S', price: 412.40, change: -17.80, changePercent: -4.14 },
+  { symbol: 'OPEN', name: 'Opendoor Technologies', price: 9.07, change: -1.45, changePercent: -13.78 },
   { symbol: 'MAERSK-B', name: 'A.P. Møller - Mærsk', price: 12450, change: -180, changePercent: -1.43 },
   { symbol: 'DSV', name: 'DSV', price: 1250, change: 25, changePercent: 2.04 },
   { symbol: 'ORSTED', name: 'Ørsted', price: 426, change: -8, changePercent: -1.84 },
   { symbol: 'CARL-B', name: 'Carlsberg', price: 980, change: 15, changePercent: 1.55 },
   { symbol: 'VWS', name: 'Vestas Wind Systems', price: 185.5, change: 3.2, changePercent: 1.75 },
-  { symbol: 'DANSKE', name: 'Danske Bank', price: 185, change: 2.5, changePercent: 1.37 },
-  { symbol: 'ISS', name: 'ISS', price: 145, change: -1.2, changePercent: -0.82 },
-  { symbol: 'ROCKWOOL', name: 'Rockwool', price: 2100, change: 45, changePercent: 2.19 },
-  { symbol: 'PANDORA', name: 'Pandora', price: 850, change: 12, changePercent: 1.43 }
+  { symbol: 'DANSKE', name: 'Danske Bank', price: 185, change: 2.5, changePercent: 1.37 }
 ]
 
 export default function FinanceView({ mode }: FinanceViewProps) {
