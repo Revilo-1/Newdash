@@ -17,7 +17,11 @@ import {
   Filter,
   CreditCard,
   Calendar,
-  DollarSign
+  DollarSign,
+  Edit,
+  Trash2,
+  X,
+  Check
 } from 'lucide-react'
 import { DashboardMode } from '@/types/dashboard'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -25,6 +29,30 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface FinanceViewProps {
   mode: DashboardMode
+}
+
+interface Stock {
+  id: string
+  name: string
+  symbol: string
+  logo: string
+  category: string
+  categoryColor: string
+  shares: number
+  gak: number // Gennemsnitlig AnskaffelsesKurs
+  purchaseDate: string
+  currentPrice: number
+  marketValue: number
+  profitLoss: number
+  profitLossPercent: number
+}
+
+interface SearchResult {
+  symbol: string
+  name: string
+  price: number
+  change: number
+  changePercent: number
 }
 
 // Mock Nordnet portfolio data
@@ -71,108 +99,145 @@ const upcomingPayments = [
   }
 ]
 
-// Mock Danish stock holdings
-const stockHoldings = [
+// Mock Danish stock holdings with full data
+const initialStocks: Stock[] = [
   {
     id: '1',
     name: 'Novo Nordisk',
     symbol: 'NOVO-B',
     logo: '💊',
-    time: 'Live',
     category: 'Healthcare',
     categoryColor: 'bg-blue-500',
-    amount: '+42.500 kr',
-    type: 'profit',
-    change: '+1.2%',
-    shares: '50 aktier'
+    shares: 50,
+    gak: 800,
+    purchaseDate: '2024-01-15',
+    currentPrice: 850,
+    marketValue: 42500,
+    profitLoss: 2500,
+    profitLossPercent: 6.25
   },
   {
     id: '2',
     name: 'A.P. Møller - Mærsk',
     symbol: 'MAERSK-B',
     logo: '🚢',
-    time: 'Live',
     category: 'Transportation',
     categoryColor: 'bg-orange-500',
-    amount: '+99.600 kr',
-    type: 'profit',
-    change: '-1.4%',
-    shares: '8 aktier'
+    shares: 8,
+    gak: 13000,
+    purchaseDate: '2024-02-20',
+    currentPrice: 12450,
+    marketValue: 99600,
+    profitLoss: -4400,
+    profitLossPercent: -4.23
   },
   {
     id: '3',
     name: 'DSV',
     symbol: 'DSV',
     logo: '📦',
-    time: 'Live',
     category: 'Transportation',
     categoryColor: 'bg-green-500',
-    amount: '+50.000 kr',
-    type: 'profit',
-    change: '+2.1%',
-    shares: '40 aktier'
+    shares: 40,
+    gak: 1200,
+    purchaseDate: '2024-03-10',
+    currentPrice: 1250,
+    marketValue: 50000,
+    profitLoss: 2000,
+    profitLossPercent: 4.17
   },
   {
     id: '4',
     name: 'Ørsted',
     symbol: 'ORSTED',
     logo: '🌱',
-    time: 'Live',
     category: 'Energy',
     categoryColor: 'bg-emerald-500',
-    amount: '+42.600 kr',
-    type: 'profit',
-    change: '-1.9%',
-    shares: '100 aktier'
+    shares: 100,
+    gak: 450,
+    purchaseDate: '2024-04-05',
+    currentPrice: 426,
+    marketValue: 42600,
+    profitLoss: -2400,
+    profitLossPercent: -5.33
   },
   {
     id: '5',
     name: 'Carlsberg',
     symbol: 'CARL-B',
     logo: '🍺',
-    time: 'Live',
     category: 'Consumer Goods',
     categoryColor: 'bg-amber-500',
-    amount: '+29.400 kr',
-    type: 'profit',
-    change: '+1.6%',
-    shares: '30 aktier'
+    shares: 30,
+    gak: 950,
+    purchaseDate: '2024-05-12',
+    currentPrice: 980,
+    marketValue: 29400,
+    profitLoss: 900,
+    profitLossPercent: 3.16
   },
   {
     id: '6',
     name: 'Vestas Wind Systems',
     symbol: 'VWS',
     logo: '🌪️',
-    time: 'Live',
     category: 'Energy',
     categoryColor: 'bg-teal-500',
-    amount: '+37.100 kr',
-    type: 'profit',
-    change: '+1.8%',
-    shares: '200 aktier'
+    shares: 200,
+    gak: 180,
+    purchaseDate: '2024-06-01',
+    currentPrice: 185.5,
+    marketValue: 37100,
+    profitLoss: 1100,
+    profitLossPercent: 3.06
   }
+]
+
+// Mock search results for stock search
+const mockSearchResults: SearchResult[] = [
+  { symbol: 'NOVO-B', name: 'Novo Nordisk', price: 850, change: 12, changePercent: 1.43 },
+  { symbol: 'MAERSK-B', name: 'A.P. Møller - Mærsk', price: 12450, change: -180, changePercent: -1.43 },
+  { symbol: 'DSV', name: 'DSV', price: 1250, change: 25, changePercent: 2.04 },
+  { symbol: 'ORSTED', name: 'Ørsted', price: 426, change: -8, changePercent: -1.84 },
+  { symbol: 'CARL-B', name: 'Carlsberg', price: 980, change: 15, changePercent: 1.55 },
+  { symbol: 'VWS', name: 'Vestas Wind Systems', price: 185.5, change: 3.2, changePercent: 1.75 },
+  { symbol: 'DANSKE', name: 'Danske Bank', price: 185, change: 2.5, changePercent: 1.37 },
+  { symbol: 'ISS', name: 'ISS', price: 145, change: -1.2, changePercent: -0.82 },
+  { symbol: 'ROCKWOOL', name: 'Rockwool', price: 2100, change: 45, changePercent: 2.19 },
+  { symbol: 'PANDORA', name: 'Pandora', price: 850, change: 12, changePercent: 1.43 }
 ]
 
 export default function FinanceView({ mode }: FinanceViewProps) {
   const { t } = useLanguage()
   const [selectedTimeframe, setSelectedTimeframe] = useState('1Y')
-  const [liveHoldings, setLiveHoldings] = useState(stockHoldings)
+  const [stocks, setStocks] = useState<Stock[]>(initialStocks)
+  const [showAddModal, setShowAddModal] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [selectedStock, setSelectedStock] = useState<SearchResult | null>(null)
+  const [shares, setShares] = useState('')
+  const [gak, setGak] = useState('')
+  const [purchaseDate, setPurchaseDate] = useState('')
+  const [editingStock, setEditingStock] = useState<Stock | null>(null)
 
   // Simulate real-time price updates
   useEffect(() => {
     const interval = setInterval(() => {
-      setLiveHoldings(prevHoldings => 
-        prevHoldings.map(holding => {
+      setStocks(prevStocks => 
+        prevStocks.map(stock => {
           // Simulate small price changes
           const change = (Math.random() - 0.5) * 0.02 // ±1% change
-          const currentValue = parseFloat(holding.amount.replace(/[^\d]/g, ''))
-          const newValue = Math.max(0, currentValue + (currentValue * change))
-          const newChange = change > 0 ? `+${(change * 100).toFixed(1)}%` : `${(change * 100).toFixed(1)}%`
+          const newPrice = Math.max(0, stock.currentPrice + (stock.currentPrice * change))
+          const newMarketValue = stock.shares * newPrice
+          const newProfitLoss = newMarketValue - (stock.shares * stock.gak)
+          const newProfitLossPercent = (newProfitLoss / (stock.shares * stock.gak)) * 100
           
           return {
-            ...holding,
-            amount: `+${newValue.toLocaleString('da-DK')} kr`,
-            change: newChange
+            ...stock,
+            currentPrice: newPrice,
+            marketValue: newMarketValue,
+            profitLoss: newProfitLoss,
+            profitLossPercent: newProfitLossPercent
           }
         })
       )
@@ -180,6 +245,92 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
     return () => clearInterval(interval)
   }, [])
+
+  // Search functionality
+  useEffect(() => {
+    if (searchQuery.length > 1) {
+      const filtered = mockSearchResults.filter(stock => 
+        stock.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        stock.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+      setSearchResults(filtered)
+    } else {
+      setSearchResults([])
+    }
+  }, [searchQuery])
+
+  // Calculate total portfolio value
+  const totalPortfolioValue = stocks.reduce((sum, stock) => sum + stock.marketValue, 0)
+  const totalProfitLoss = stocks.reduce((sum, stock) => sum + stock.profitLoss, 0)
+  const totalProfitLossPercent = (totalProfitLoss / (totalPortfolioValue - totalProfitLoss)) * 100
+
+  // Stock management functions
+  const handleAddStock = () => {
+    if (selectedStock && shares && gak && purchaseDate) {
+      const newStock: Stock = {
+        id: Date.now().toString(),
+        name: selectedStock.name,
+        symbol: selectedStock.symbol,
+        logo: '📈',
+        category: 'Custom',
+        categoryColor: 'bg-purple-500',
+        shares: parseInt(shares),
+        gak: parseFloat(gak),
+        purchaseDate: purchaseDate,
+        currentPrice: selectedStock.price,
+        marketValue: parseInt(shares) * selectedStock.price,
+        profitLoss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
+        profitLossPercent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
+      }
+      
+      setStocks([...stocks, newStock])
+      setShowAddModal(false)
+      setSearchQuery('')
+      setSelectedStock(null)
+      setShares('')
+      setGak('')
+      setPurchaseDate('')
+    }
+  }
+
+  const handleDeleteStock = (id: string) => {
+    setStocks(stocks.filter(stock => stock.id !== id))
+  }
+
+  const handleEditStock = (stock: Stock) => {
+    setEditingStock(stock)
+    setSelectedStock({ symbol: stock.symbol, name: stock.name, price: stock.currentPrice, change: 0, changePercent: 0 })
+    setShares(stock.shares.toString())
+    setGak(stock.gak.toString())
+    setPurchaseDate(stock.purchaseDate)
+    setShowAddModal(true)
+  }
+
+  const handleUpdateStock = () => {
+    if (editingStock && selectedStock && shares && gak && purchaseDate) {
+      const updatedStock: Stock = {
+        ...editingStock,
+        name: selectedStock.name,
+        symbol: selectedStock.symbol,
+        shares: parseInt(shares),
+        gak: parseFloat(gak),
+        purchaseDate: purchaseDate,
+        currentPrice: selectedStock.price,
+        marketValue: parseInt(shares) * selectedStock.price,
+        profitLoss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
+        profitLossPercent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
+      }
+      
+      setStocks(stocks.map(stock => stock.id === editingStock.id ? updatedStock : stock))
+      setShowAddModal(false)
+      setEditingStock(null)
+      setSearchQuery('')
+      setSelectedStock(null)
+      setShares('')
+      setGak('')
+      setPurchaseDate('')
+    }
+  }
 
   // Only show this page for private dashboard
   if (mode !== 'private') {
@@ -256,8 +407,11 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
             {/* Portfolio Value */}
             <div className="mb-6">
-              <p className="text-3xl font-bold text-gray-900">301.200 kr</p>
+              <p className="text-3xl font-bold text-gray-900">{totalPortfolioValue.toLocaleString('da-DK')} kr</p>
               <p className="text-sm text-gray-600">Portefølje Værdi</p>
+              <p className={`text-sm ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLoss.toLocaleString('da-DK')} kr ({totalProfitLossPercent >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}%)
+              </p>
             </div>
 
             {/* Virtual Card */}
@@ -401,8 +555,10 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">301.200 kr</p>
-              <p className="text-sm text-green-600">+5.7% vs sidste år</p>
+              <p className="text-2xl font-bold text-gray-900">{totalPortfolioValue.toLocaleString('da-DK')} kr</p>
+              <p className={`text-sm ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}% i dag
+              </p>
             </div>
           </div>
 
@@ -415,7 +571,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Aktier</p>
-                  <p className="text-2xl font-bold text-gray-900">6</p>
+                  <p className="text-2xl font-bold text-gray-900">{stocks.length}</p>
                   <p className="text-xs text-gray-500">Aktier i porteføljen</p>
                 </div>
               </div>
@@ -428,7 +584,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Portefølje Værdi</p>
-                  <p className="text-2xl font-bold text-green-600">+301.200 kr</p>
+                  <p className="text-2xl font-bold text-green-600">+{totalPortfolioValue.toLocaleString('da-DK')} kr</p>
                   <p className="text-xs text-gray-500">Total portefølje værdi</p>
                 </div>
               </div>
@@ -440,9 +596,13 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                   <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Dagens Gevinst</p>
-                  <p className="text-2xl font-bold text-green-600">+1.200 kr</p>
-                  <p className="text-xs text-gray-500">+0.4% i dag</p>
+                  <p className="text-sm font-medium text-gray-600">Total Gevinst/Tab</p>
+                  <p className={`text-2xl font-bold ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLoss.toLocaleString('da-DK')} kr
+                  </p>
+                  <p className={`text-xs ${totalProfitLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}% totalt
+                  </p>
                 </div>
               </div>
             </div>
@@ -453,8 +613,12 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-semibold text-gray-900">Aktie Holdings</h2>
               <div className="flex items-center space-x-2">
-                <button className="p-2 text-gray-400 hover:text-gray-600">
-                  <Search className="h-4 w-4" />
+                <button 
+                  onClick={() => setShowAddModal(true)}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  Tilføj Aktie
                 </button>
                 <button className="p-2 text-gray-400 hover:text-gray-600">
                   <Filter className="h-4 w-4" />
@@ -467,34 +631,196 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
 
             <div className="space-y-4">
-              {liveHoldings.map((holding) => (
-                <div key={holding.id} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+              {stocks.map((stock) => (
+                <div key={stock.id} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
                   <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-lg">
-                    {holding.logo}
+                    {stock.logo}
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{holding.name}</p>
-                    <p className="text-sm text-gray-600">{holding.symbol} • {holding.shares}</p>
+                    <p className="font-medium text-gray-900">{stock.name}</p>
+                    <p className="text-sm text-gray-600">{stock.symbol} • {stock.shares} aktier • GAK: {stock.gak.toLocaleString('da-DK')} kr</p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 ${holding.categoryColor} rounded-sm`}></div>
-                    <span className="text-sm text-gray-600">{holding.category}</span>
+                    <div className={`w-3 h-3 ${stock.categoryColor} rounded-sm`}></div>
+                    <span className="text-sm text-gray-600">{stock.category}</span>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">{holding.amount}</p>
-                    <p className={`text-sm ${holding.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
-                      {holding.change}
+                    <p className="font-semibold text-gray-900">{stock.marketValue.toLocaleString('da-DK')} kr</p>
+                    <p className={`text-sm ${stock.profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {stock.profitLoss >= 0 ? '+' : ''}{stock.profitLoss.toLocaleString('da-DK')} kr ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
                     </p>
                   </div>
-                  <button className="p-1 text-gray-400 hover:text-gray-600">
-                    <MoreVertical className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center space-x-1">
+                    <button 
+                      onClick={() => handleEditStock(stock)}
+                      className="p-1 text-gray-400 hover:text-blue-600"
+                    >
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteStock(stock.id)}
+                      className="p-1 text-gray-400 hover:text-red-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Add/Edit Stock Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {editingStock ? 'Rediger Aktie' : 'Tilføj Ny Aktie'}
+              </h3>
+              <button 
+                onClick={() => {
+                  setShowAddModal(false)
+                  setEditingStock(null)
+                  setSearchQuery('')
+                  setSelectedStock(null)
+                  setShares('')
+                  setGak('')
+                  setPurchaseDate('')
+                }}
+                className="p-1 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Stock Search */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Søg Aktie
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Skriv aktie navn eller symbol..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                  <Search className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
+                </div>
+                
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="mt-2 border border-gray-200 rounded-md max-h-40 overflow-y-auto">
+                    {searchResults.map((result) => (
+                      <button
+                        key={result.symbol}
+                        onClick={() => {
+                          setSelectedStock(result)
+                          setSearchQuery(`${result.name} (${result.symbol})`)
+                          setSearchResults([])
+                        }}
+                        className="w-full px-3 py-2 text-left hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium text-gray-900">{result.name}</p>
+                            <p className="text-sm text-gray-600">{result.symbol}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-medium text-gray-900">{result.price.toLocaleString('da-DK')} kr</p>
+                            <p className={`text-sm ${result.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {result.change >= 0 ? '+' : ''}{result.change.toLocaleString('da-DK')} kr ({result.changePercent >= 0 ? '+' : ''}{result.changePercent.toFixed(2)}%)
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected Stock Display */}
+              {selectedStock && (
+                <div className="bg-gray-50 p-3 rounded-md">
+                  <p className="font-medium text-gray-900">{selectedStock.name}</p>
+                  <p className="text-sm text-gray-600">{selectedStock.symbol} • {selectedStock.price.toLocaleString('da-DK')} kr</p>
+                </div>
+              )}
+
+              {/* Shares Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Antal Aktier
+                </label>
+                <input
+                  type="number"
+                  value={shares}
+                  onChange={(e) => setShares(e.target.value)}
+                  placeholder="F.eks. 100"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              {/* GAK Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  GAK (Gennemsnitlig AnskaffelsesKurs)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={gak}
+                  onChange={(e) => setGak(e.target.value)}
+                  placeholder="F.eks. 850.50"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              {/* Purchase Date Input */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Købsdato
+                </label>
+                <input
+                  type="date"
+                  value={purchaseDate}
+                  onChange={(e) => setPurchaseDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowAddModal(false)
+                    setEditingStock(null)
+                    setSearchQuery('')
+                    setSelectedStock(null)
+                    setShares('')
+                    setGak('')
+                    setPurchaseDate('')
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Annuller
+                </button>
+                <button
+                  onClick={editingStock ? handleUpdateStock : handleAddStock}
+                  disabled={!selectedStock || !shares || !gak || !purchaseDate}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  {editingStock ? 'Opdater' : 'Tilføj'} Aktie
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
