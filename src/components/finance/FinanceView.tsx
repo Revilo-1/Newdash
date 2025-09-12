@@ -58,18 +58,18 @@ interface SearchResult {
 
 // Mock Nordnet portfolio data
 const portfolioData = [
-  { month: 'Jan', amount: 170000 },
-  { month: 'Feb', amount: 175000 },
-  { month: 'Mar', amount: 172000 },
-  { month: 'Apr', amount: 180000 },
-  { month: 'May', amount: 185000 },
-  { month: 'Jun', amount: 182000 },
-  { month: 'Jul', amount: 190000 },
-  { month: 'Aug', amount: 188000 },
-  { month: 'Sep', amount: 195000 },
-  { month: 'Oct', amount: 192000 },
-  { month: 'Nov', amount: 200000 },
-  { month: 'Dec', amount: 180265 }
+  { month: 'Jan', amount: 280000 },
+  { month: 'Feb', amount: 285000 },
+  { month: 'Mar', amount: 282000 },
+  { month: 'Apr', amount: 290000 },
+  { month: 'May', amount: 295000 },
+  { month: 'Jun', amount: 292000 },
+  { month: 'Jul', amount: 300000 },
+  { month: 'Aug', amount: 298000 },
+  { month: 'Sep', amount: 305000 },
+  { month: 'Oct', amount: 302000 },
+  { month: 'Nov', amount: 310000 },
+  { month: 'Dec', amount: 300000 }
 ]
 
 // Sample upcoming payments
