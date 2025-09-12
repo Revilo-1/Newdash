@@ -14,7 +14,8 @@ import {
   Bell,
   Mail,
   Rocket,
-  Heart
+  Heart,
+  CreditCard
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 
@@ -22,6 +23,7 @@ const getNavigation = (t: any) => [
   { name: t.navigation.dashboard, href: '/dashboard', icon: LayoutDashboard },
   { name: t.navigation.tasks, href: '/tasks', icon: Target },
   { name: t.navigation.healthWellness, href: '/health-wellness', icon: Heart, privateOnly: true },
+  { name: t.navigation.finance, href: '/finance', icon: CreditCard, privateOnly: true },
   { name: t.navigation.users, href: '/users', icon: Users },
   { name: t.navigation.aiIntegration, href: '/ai', icon: Zap },
   { name: t.navigation.api, href: '/api', icon: Key },

@@ -35,6 +35,7 @@ export interface Translations {
     dashboard: string
     tasks: string
     healthWellness: string
+    finance: string
     users: string
     aiIntegration: string
     api: string
@@ -348,6 +349,7 @@ export const translations: Record<Language, Translations> = {
       dashboard: 'Dashboard',
       tasks: 'Tasks',
       healthWellness: 'Health & Wellness',
+      finance: 'Finance',
       users: 'Users',
       aiIntegration: 'AI Integration',
       api: 'API',
@@ -651,6 +653,7 @@ export const translations: Record<Language, Translations> = {
       dashboard: 'Dashboard',
       tasks: 'Opgaver',
       healthWellness: 'Sundhed & Trivsel',
+      finance: 'Økonomi',
       users: 'Brugere',
       aiIntegration: 'AI Integration',
       api: 'API',
