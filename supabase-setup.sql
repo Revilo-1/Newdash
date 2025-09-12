@@ -135,10 +135,10 @@ CREATE INDEX IF NOT EXISTS idx_calendar_events_user_id ON public.calendar_events
 
 -- 11. Insert demo user
 INSERT INTO public.users (id, email, name) 
-VALUES ('550e8400-e29b-41d4-a716-446655440000', 'demoen@outlook.dk', 'Demo User')
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'oliver@schrader.dk', 'Oliver Schrader')
 ON CONFLICT (email) DO NOTHING;
 
 -- 12. Insert demo user profile
 INSERT INTO public.user_profiles (user_id, bio, preferences) 
-VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Demo user for MyDashboard', '{"theme": "light", "language": "da"}')
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'Oliver Schrader - MyDashboard User', '{"theme": "light", "language": "da"}')
 ON CONFLICT DO NOTHING;

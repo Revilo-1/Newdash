@@ -16,13 +16,13 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Demo user - simple check for demo purposes
-        if (credentials.email === 'demoen@outlook.dk' && credentials.password === 'password123') {
+        if (credentials.email === 'oliver@schrader.dk' && credentials.password === 'ko112233') {
           try {
             // Check if user exists in database, create if not
             let user = await DatabaseService.getUserByEmail(credentials.email)
             
             if (!user) {
-              user = await DatabaseService.createUser(credentials.email, 'Demo User')
+              user = await DatabaseService.createUser(credentials.email, 'Oliver Schrader')
             }
 
             return {
@@ -35,8 +35,8 @@ export const authOptions: NextAuthOptions = {
             // Fallback to demo user without database
             return {
               id: '550e8400-e29b-41d4-a716-446655440000',
-              email: 'demoen@outlook.dk',
-              name: 'Demo User',
+              email: 'oliver@schrader.dk',
+              name: 'Oliver Schrader',
             }
           }
         }
