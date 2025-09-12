@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, Rocket } from 'lucide-react'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -18,23 +18,15 @@ export default function LoginPage() {
     setIsLoading(true)
     setError('')
 
-    try {
-      const result = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-      if (result?.error) {
-        setError('Invalid email or password')
-      } else if (result?.ok) {
-        router.push('/dashboard')
-      }
-    } catch (error) {
-      setError('An error occurred. Please try again.')
-    } finally {
+    if (error) {
+      setError(error.message || 'Invalid email or password')
       setIsLoading(false)
+      return
     }
+
+    router.push('/dashboard') // ret ruten hvis din app bruger noget andet
   }
 
   return (
@@ -51,12 +43,14 @@ export default function LoginPage() {
             Sign in to manage your tasks, goals, and life
           </p>
         </div>
+
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md">
               {error}
             </div>
           )}
+
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -79,6 +73,7 @@ export default function LoginPage() {
                 />
               </div>
             </div>
+
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 Password
@@ -119,12 +114,6 @@ export default function LoginPage() {
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
-          </div>
-
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
-              Demo credentials: admin@lifedash.com / password123
-            </p>
           </div>
         </form>
       </div>
