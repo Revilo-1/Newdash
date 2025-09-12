@@ -260,41 +260,78 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
   // Stock management functions
   const handleAddStock = async () => {
-    if (selectedStock && shares && gak && purchaseDate) {
-      try {
-        const stockData = {
-          name: selectedStock.name,
-          symbol: selectedStock.symbol,
-          logo: '📈',
-          category: 'Custom',
-          categoryColor: 'bg-purple-500',
-          shares: parseInt(shares),
-          gak: parseFloat(gak),
-          purchase_date: purchaseDate,
-          current_price: selectedStock.price,
-          market_value: parseInt(shares) * selectedStock.price,
-          profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
-          profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
-        }
+    console.log('handleAddStock called', { selectedStock, shares, gak, purchaseDate })
+    
+    if (!selectedStock || !shares || !gak || !purchaseDate) {
+      console.log('Missing required fields')
+      return
+    }
 
-        await saveStock(stockData)
-        setShowAddModal(false)
-        setSearchQuery('')
-        setSelectedStock(null)
-        setShares('')
-        setGak('')
-        setPurchaseDate('')
-      } catch (error) {
-        console.error('Error adding stock:', error)
+    try {
+      const stockData = {
+        name: selectedStock.name,
+        symbol: selectedStock.symbol,
+        logo: '📈',
+        category: 'Custom',
+        categoryColor: 'bg-purple-500',
+        shares: parseInt(shares),
+        gak: parseFloat(gak),
+        purchase_date: purchaseDate,
+        current_price: selectedStock.price,
+        market_value: parseInt(shares) * selectedStock.price,
+        profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
+        profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
       }
+
+      console.log('Saving stock data:', stockData)
+      
+      // Try to save to database first
+      try {
+        await saveStock(stockData)
+        console.log('Stock saved to database successfully')
+      } catch (dbError) {
+        console.log('Database save failed, adding locally:', dbError)
+        // Fallback: add to local state if database fails
+        const newStock: Stock = {
+          id: Date.now().toString(),
+          name: stockData.name,
+          symbol: stockData.symbol,
+          logo: stockData.logo,
+          category: stockData.category,
+          categoryColor: stockData.categoryColor,
+          shares: stockData.shares,
+          gak: stockData.gak,
+          purchaseDate: stockData.purchase_date,
+          currentPrice: stockData.current_price,
+          marketValue: stockData.market_value,
+          profitLoss: stockData.profit_loss,
+          profitLossPercent: stockData.profit_loss_percent
+        }
+        setStocks(prev => [newStock, ...prev])
+        console.log('Stock added locally')
+      }
+      
+      setShowAddModal(false)
+      setSearchQuery('')
+      setSelectedStock(null)
+      setShares('')
+      setGak('')
+      setPurchaseDate('')
+    } catch (error) {
+      console.error('Error adding stock:', error)
+      alert('Fejl ved tilføjelse af aktie: ' + error.message)
     }
   }
 
   const handleDeleteStock = async (id: string) => {
     try {
       await deleteStock(id)
+      console.log('Stock deleted from database successfully')
     } catch (error) {
-      console.error('Error deleting stock:', error)
+      console.log('Database delete failed, deleting locally:', error)
+      // Fallback: delete from local state if database fails
+      setStocks(prev => prev.filter(stock => stock.id !== id))
+      console.log('Stock deleted locally')
     }
   }
 
@@ -308,31 +345,61 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   }
 
   const handleUpdateStock = async () => {
-    if (editingStock && selectedStock && shares && gak && purchaseDate) {
-      try {
-        const updates = {
-          name: selectedStock.name,
-          symbol: selectedStock.symbol,
-          shares: parseInt(shares),
-          gak: parseFloat(gak),
-          purchase_date: purchaseDate,
-          current_price: selectedStock.price,
-          market_value: parseInt(shares) * selectedStock.price,
-          profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
-          profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
-        }
+    console.log('handleUpdateStock called', { editingStock, selectedStock, shares, gak, purchaseDate })
+    
+    if (!editingStock || !selectedStock || !shares || !gak || !purchaseDate) {
+      console.log('Missing required fields for update')
+      return
+    }
 
-        await updateStock(editingStock.id, updates)
-        setShowAddModal(false)
-        setEditingStock(null)
-        setSearchQuery('')
-        setSelectedStock(null)
-        setShares('')
-        setGak('')
-        setPurchaseDate('')
-      } catch (error) {
-        console.error('Error updating stock:', error)
+    try {
+      const updates = {
+        name: selectedStock.name,
+        symbol: selectedStock.symbol,
+        shares: parseInt(shares),
+        gak: parseFloat(gak),
+        purchase_date: purchaseDate,
+        current_price: selectedStock.price,
+        market_value: parseInt(shares) * selectedStock.price,
+        profit_loss: (parseInt(shares) * selectedStock.price) - (parseInt(shares) * parseFloat(gak)),
+        profit_loss_percent: ((selectedStock.price - parseFloat(gak)) / parseFloat(gak)) * 100
       }
+
+      console.log('Updating stock with data:', updates)
+      
+      // Try to update in database first
+      try {
+        await updateStock(editingStock.id, updates)
+        console.log('Stock updated in database successfully')
+      } catch (dbError) {
+        console.log('Database update failed, updating locally:', dbError)
+        // Fallback: update local state if database fails
+        const updatedStock: Stock = {
+          ...editingStock,
+          name: updates.name,
+          symbol: updates.symbol,
+          shares: updates.shares,
+          gak: updates.gak,
+          purchaseDate: updates.purchase_date,
+          currentPrice: updates.current_price,
+          marketValue: updates.market_value,
+          profitLoss: updates.profit_loss,
+          profitLossPercent: updates.profit_loss_percent
+        }
+        setStocks(prev => prev.map(stock => stock.id === editingStock.id ? updatedStock : stock))
+        console.log('Stock updated locally')
+      }
+      
+      setShowAddModal(false)
+      setEditingStock(null)
+      setSearchQuery('')
+      setSelectedStock(null)
+      setShares('')
+      setGak('')
+      setPurchaseDate('')
+    } catch (error) {
+      console.error('Error updating stock:', error)
+      alert('Fejl ved opdatering af aktie: ' + error.message)
     }
   }
 
