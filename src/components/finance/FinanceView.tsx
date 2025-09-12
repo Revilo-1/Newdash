@@ -57,20 +57,20 @@ interface SearchResult {
   changePercent: number
 }
 
-// Mock Nordnet portfolio data
+// Mock Nordnet portfolio data - updated to reflect actual portfolio value
 const portfolioData = [
-  { month: 'Jan', amount: 280000 },
-  { month: 'Feb', amount: 285000 },
-  { month: 'Mar', amount: 282000 },
-  { month: 'Apr', amount: 290000 },
-  { month: 'May', amount: 295000 },
-  { month: 'Jun', amount: 292000 },
-  { month: 'Jul', amount: 300000 },
-  { month: 'Aug', amount: 298000 },
-  { month: 'Sep', amount: 305000 },
-  { month: 'Oct', amount: 302000 },
-  { month: 'Nov', amount: 310000 },
-  { month: 'Dec', amount: 300000 }
+  { month: 'Jan', amount: 180000 },
+  { month: 'Feb', amount: 185000 },
+  { month: 'Mar', amount: 182000 },
+  { month: 'Apr', amount: 190000 },
+  { month: 'May', amount: 195000 },
+  { month: 'Jun', amount: 192000 },
+  { month: 'Jul', amount: 200000 },
+  { month: 'Aug', amount: 198000 },
+  { month: 'Sep', amount: 205000 },
+  { month: 'Oct', amount: 202000 },
+  { month: 'Nov', amount: 210000 },
+  { month: 'Dec', amount: 189152 } // Current actual portfolio value in DKK
 ]
 
 // Sample upcoming payments
@@ -277,6 +277,11 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const totalDKKValue = dkkStocks.reduce((sum, stock) => sum + stock.marketValue, 0)
   const totalUSDProfitLoss = usdStocks.reduce((sum, stock) => sum + stock.profitLoss, 0)
   const totalDKKProfitLoss = dkkStocks.reduce((sum, stock) => sum + stock.profitLoss, 0)
+  
+  // Convert USD to DKK for total portfolio value (1 USD = 7.0 DKK)
+  const usdToDkkRate = 7.0
+  const totalPortfolioValueInDKK = totalDKKValue + (totalUSDValue * usdToDkkRate)
+  const totalProfitLossInDKK = totalDKKProfitLoss + (totalUSDProfitLoss * usdToDkkRate)
 
   // Stock management functions
   const handleAddStock = async () => {
@@ -689,9 +694,9 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{totalDKKValue.toLocaleString('da-DK')} DKK</p>
-              <p className={`text-sm ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}% i dag
+              <p className="text-2xl font-bold text-gray-900">{totalPortfolioValueInDKK.toLocaleString('da-DK')} DKK</p>
+              <p className={`text-sm ${totalProfitLossInDKK >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {totalProfitLossInDKK >= 0 ? '+' : ''}{totalProfitLossInDKK.toLocaleString('da-DK')} DKK ({((totalProfitLossInDKK / (totalPortfolioValueInDKK - totalProfitLossInDKK)) * 100).toFixed(2)}%)
               </p>
             </div>
           </div>
@@ -718,7 +723,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Portefølje Værdi</p>
-                  <p className="text-2xl font-bold text-green-600">+{totalDKKValue.toLocaleString('da-DK')} DKK</p>
+                  <p className="text-2xl font-bold text-green-600">+{totalPortfolioValueInDKK.toLocaleString('da-DK')} DKK</p>
                   <p className="text-xs text-gray-500">Total portefølje værdi</p>
                 </div>
               </div>
@@ -731,11 +736,11 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Gevinst/Tab</p>
-                  <p className={`text-2xl font-bold ${totalDKKProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {totalDKKProfitLoss >= 0 ? '+' : ''}{totalDKKProfitLoss.toLocaleString('da-DK')} DKK
+                  <p className={`text-2xl font-bold ${totalProfitLossInDKK >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {totalProfitLossInDKK >= 0 ? '+' : ''}{totalProfitLossInDKK.toLocaleString('da-DK')} DKK
                   </p>
-                  <p className={`text-xs ${totalProfitLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                    {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}% totalt
+                  <p className={`text-xs ${totalProfitLossInDKK >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {totalProfitLossInDKK >= 0 ? '+' : ''}{((totalProfitLossInDKK / (totalPortfolioValueInDKK - totalProfitLossInDKK)) * 100).toFixed(2)}% totalt
                   </p>
                 </div>
               </div>
