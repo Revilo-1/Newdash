@@ -9,7 +9,6 @@ import {
   Send, 
   Download, 
   FileText, 
-  PiggyBank,
   ArrowUpRight,
   ArrowDownLeft,
   TrendingUp,
@@ -522,30 +521,11 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav className="flex" aria-label="Breadcrumb">
-        <ol className="flex items-center space-x-4">
-          <li>
-            <div>
-              <span className="text-gray-500">Home</span>
-            </div>
-          </li>
-          <li>
-            <div className="flex items-center">
-              <span className="text-gray-400">/</span>
-              <span className="ml-4 text-gray-500">Økonomi</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Økonomi</h1>
-          <p className="mt-2 text-base sm:text-lg lg:text-xl text-gray-600">
-            Administrer din økonomi og følg dine udgifter
-          </p>
         </div>
         <div className="flex items-center space-x-3">
           <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
@@ -621,18 +601,6 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                   <Plus className="h-4 w-4 text-purple-600" />
                 </div>
                 <span className="text-xs text-gray-600">Anmod</span>
-              </button>
-              <button className="flex flex-col items-center space-y-2 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="p-2 bg-orange-100 rounded-full">
-                  <FileText className="h-4 w-4 text-orange-600" />
-                </div>
-                <span className="text-xs text-gray-600">Faktura</span>
-              </button>
-              <button className="flex flex-col items-center space-y-2 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-                <div className="p-2 bg-pink-100 rounded-full">
-                  <PiggyBank className="h-4 w-4 text-pink-600" />
-                </div>
-                <span className="text-xs text-gray-600">Donér</span>
               </button>
             </div>
           </div>
