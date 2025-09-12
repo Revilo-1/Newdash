@@ -269,6 +269,14 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const totalPortfolioValue = stocks.reduce((sum, stock) => sum + stock.marketValue, 0)
   const totalProfitLoss = stocks.reduce((sum, stock) => sum + stock.profitLoss, 0)
   const totalProfitLossPercent = (totalProfitLoss / (totalPortfolioValue - totalProfitLoss)) * 100
+  
+  // Calculate USD and DKK totals separately
+  const usdStocks = stocks.filter(stock => stock.currency === 'USD')
+  const dkkStocks = stocks.filter(stock => stock.currency === 'DKK')
+  const totalUSDValue = usdStocks.reduce((sum, stock) => sum + stock.marketValue, 0)
+  const totalDKKValue = dkkStocks.reduce((sum, stock) => sum + stock.marketValue, 0)
+  const totalUSDProfitLoss = usdStocks.reduce((sum, stock) => sum + stock.profitLoss, 0)
+  const totalDKKProfitLoss = dkkStocks.reduce((sum, stock) => sum + stock.profitLoss, 0)
 
   // Stock management functions
   const handleAddStock = async () => {
@@ -519,11 +527,25 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
             {/* Portfolio Value */}
             <div className="mb-6">
-              <p className="text-3xl font-bold text-gray-900">{totalPortfolioValue.toLocaleString('da-DK')} kr</p>
-              <p className="text-sm text-gray-600">Portefølje Værdi</p>
-              <p className={`text-sm ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLoss.toLocaleString('da-DK')} kr ({totalProfitLossPercent >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}%)
-              </p>
+              <div className="space-y-2">
+                {totalUSDValue > 0 && (
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{totalUSDValue.toLocaleString('da-DK')} USD</p>
+                    <p className={`text-sm ${totalUSDProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {totalUSDProfitLoss >= 0 ? '+' : ''}{totalUSDProfitLoss.toLocaleString('da-DK')} USD
+                    </p>
+                  </div>
+                )}
+                {totalDKKValue > 0 && (
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">{totalDKKValue.toLocaleString('da-DK')} DKK</p>
+                    <p className={`text-sm ${totalDKKProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {totalDKKProfitLoss >= 0 ? '+' : ''}{totalDKKProfitLoss.toLocaleString('da-DK')} DKK
+                    </p>
+                  </div>
+                )}
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Portefølje Værdi</p>
             </div>
 
             {/* Virtual Card */}
@@ -652,7 +674,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                       fontSize: '12px',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                     }}
-                    formatter={(value) => [`${value.toLocaleString()} kr`, 'Portefølje Værdi']}
+                    formatter={(value) => [`${value.toLocaleString()} DKK`, 'Portefølje Værdi']}
                   />
                   <Line 
                     type="monotone" 
@@ -667,7 +689,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{totalPortfolioValue.toLocaleString('da-DK')} kr</p>
+              <p className="text-2xl font-bold text-gray-900">{totalDKKValue.toLocaleString('da-DK')} DKK</p>
               <p className={`text-sm ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}% i dag
               </p>
@@ -696,7 +718,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Portefølje Værdi</p>
-                  <p className="text-2xl font-bold text-green-600">+{totalPortfolioValue.toLocaleString('da-DK')} kr</p>
+                  <p className="text-2xl font-bold text-green-600">+{totalDKKValue.toLocaleString('da-DK')} DKK</p>
                   <p className="text-xs text-gray-500">Total portefølje værdi</p>
                 </div>
               </div>
@@ -709,8 +731,8 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Total Gevinst/Tab</p>
-                  <p className={`text-2xl font-bold ${totalProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLoss.toLocaleString('da-DK')} kr
+                  <p className={`text-2xl font-bold ${totalDKKProfitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {totalDKKProfitLoss >= 0 ? '+' : ''}{totalDKKProfitLoss.toLocaleString('da-DK')} DKK
                   </p>
                   <p className={`text-xs ${totalProfitLoss >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                     {totalProfitLoss >= 0 ? '+' : ''}{totalProfitLossPercent.toFixed(2)}% totalt
@@ -750,16 +772,16 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{stock.name}</p>
-                    <p className="text-sm text-gray-600">{stock.symbol} • {stock.shares} aktier • GAK: {stock.gak.toLocaleString('da-DK')} kr</p>
+                    <p className="text-sm text-gray-600">{stock.symbol} • {stock.shares} aktier • GAK: {stock.gak.toLocaleString('da-DK')} {stock.currency}</p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className={`w-3 h-3 ${stock.categoryColor} rounded-sm`}></div>
                     <span className="text-sm text-gray-600">{stock.category}</span>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">{stock.marketValue.toLocaleString('da-DK')} kr</p>
+                    <p className="font-semibold text-gray-900">{stock.marketValue.toLocaleString('da-DK')} {stock.currency}</p>
                     <p className={`text-sm ${stock.profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {stock.profitLoss >= 0 ? '+' : ''}{stock.profitLoss.toLocaleString('da-DK')} kr ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
+                      {stock.profitLoss >= 0 ? '+' : ''}{stock.profitLoss.toLocaleString('da-DK')} {stock.currency} ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
                     </p>
                   </div>
                   <div className="flex items-center space-x-1">
@@ -843,9 +865,9 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                             <p className="text-sm text-gray-600">{result.symbol}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium text-gray-900">{result.price.toLocaleString('da-DK')} kr</p>
+                            <p className="font-medium text-gray-900">{result.price.toLocaleString('da-DK')} {result.symbol.includes('TSLA') || result.symbol.includes('OPEN') || result.symbol.includes('CW') || result.symbol.includes('AAPL') || result.symbol.includes('MSFT') || result.symbol.includes('GOOGL') || result.symbol.includes('AMZN') || result.symbol.includes('META') || result.symbol.includes('NVDA') ? 'USD' : 'DKK'}</p>
                             <p className={`text-sm ${result.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                              {result.change >= 0 ? '+' : ''}{result.change.toLocaleString('da-DK')} kr ({result.changePercent >= 0 ? '+' : ''}{result.changePercent.toFixed(2)}%)
+                              {result.change >= 0 ? '+' : ''}{result.change.toLocaleString('da-DK')} {result.symbol.includes('TSLA') || result.symbol.includes('OPEN') || result.symbol.includes('CW') || result.symbol.includes('AAPL') || result.symbol.includes('MSFT') || result.symbol.includes('GOOGL') || result.symbol.includes('AMZN') || result.symbol.includes('META') || result.symbol.includes('NVDA') ? 'USD' : 'DKK'} ({result.changePercent >= 0 ? '+' : ''}{result.changePercent.toFixed(2)}%)
                             </p>
                           </div>
                         </div>
@@ -859,7 +881,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
               {selectedStock && (
                 <div className="bg-gray-50 p-3 rounded-md">
                   <p className="font-medium text-gray-900">{selectedStock.name}</p>
-                  <p className="text-sm text-gray-600">{selectedStock.symbol} • {selectedStock.price.toLocaleString('da-DK')} kr</p>
+                  <p className="text-sm text-gray-600">{selectedStock.symbol} • {selectedStock.price.toLocaleString('da-DK')} {selectedStock.symbol.includes('TSLA') || selectedStock.symbol.includes('OPEN') || selectedStock.symbol.includes('CW') || selectedStock.symbol.includes('AAPL') || selectedStock.symbol.includes('MSFT') || selectedStock.symbol.includes('GOOGL') || selectedStock.symbol.includes('AMZN') || selectedStock.symbol.includes('META') || selectedStock.symbol.includes('NVDA') ? 'USD' : 'DKK'}</p>
                 </div>
               )}
 
