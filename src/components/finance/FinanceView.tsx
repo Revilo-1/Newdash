@@ -177,6 +177,12 @@ const mockSearchResults: SearchResult[] = [
   { symbol: 'NOVO-B', name: 'Novo Nordisk B A/S', price: 348.30, change: 2.40, changePercent: 0.69 }, // DKK
   { symbol: 'OPEN', name: 'Opendoor Technologies', price: 9.07, change: -1.45, changePercent: -13.78 }, // USD
   { symbol: 'TSLA', name: 'Tesla', price: 395.94, change: 27.12, changePercent: 7.36 }, // USD
+  { symbol: 'AAPL', name: 'Apple Inc.', price: 175.50, change: 2.30, changePercent: 1.33 }, // USD
+  { symbol: 'MSFT', name: 'Microsoft Corporation', price: 380.25, change: -1.75, changePercent: -0.46 }, // USD
+  { symbol: 'GOOGL', name: 'Alphabet Inc.', price: 142.80, change: 3.20, changePercent: 2.29 }, // USD
+  { symbol: 'AMZN', name: 'Amazon.com Inc.', price: 155.90, change: -0.80, changePercent: -0.51 }, // USD
+  { symbol: 'META', name: 'Meta Platforms Inc.', price: 485.60, change: 8.40, changePercent: 1.76 }, // USD
+  { symbol: 'NVDA', name: 'NVIDIA Corporation', price: 875.30, change: 15.70, changePercent: 1.83 }, // USD
   { symbol: 'ZEAL', name: 'Zealand Pharma A/S', price: 412.40, change: -17.80, changePercent: -4.14 }, // DKK
   { symbol: 'MAERSK-B', name: 'A.P. Møller - Mærsk', price: 12450, change: -180, changePercent: -1.43 }, // DKK
   { symbol: 'DSV', name: 'DSV', price: 1250, change: 25, changePercent: 2.04 }, // DKK
@@ -289,7 +295,13 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                           selectedStock.symbol.includes('CW') ||
                           selectedStock.name.toLowerCase().includes('tesla') ||
                           selectedStock.name.toLowerCase().includes('opendoor') ||
-                          selectedStock.name.toLowerCase().includes('coreweave')
+                          selectedStock.name.toLowerCase().includes('coreweave') ||
+                          selectedStock.name.toLowerCase().includes('apple') ||
+                          selectedStock.name.toLowerCase().includes('microsoft') ||
+                          selectedStock.name.toLowerCase().includes('google') ||
+                          selectedStock.name.toLowerCase().includes('amazon') ||
+                          selectedStock.name.toLowerCase().includes('meta') ||
+                          selectedStock.name.toLowerCase().includes('nvidia')
         
         const stockData = {
           name: selectedStock.name,
