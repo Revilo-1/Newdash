@@ -41,7 +41,7 @@ interface Stock {
   categoryColor: string
   shares: number
   gak: number // Gennemsnitlig AnskaffelsesKurs
-  purchaseDate: string
+  purchaseDate: string // Still used internally for database
   currentPrice: number
   marketValue: number
   profitLoss: number
@@ -224,7 +224,6 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const [selectedStock, setSelectedStock] = useState<SearchResult | null>(null)
   const [shares, setShares] = useState('')
   const [gak, setGak] = useState('')
-  const [purchaseDate, setPurchaseDate] = useState('')
   const [editingStock, setEditingStock] = useState<Stock | null>(null)
 
   // Simulate real-time price updates (more realistic)
@@ -273,9 +272,9 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
   // Stock management functions
   const handleAddStock = async () => {
-    console.log('handleAddStock called', { selectedStock, shares, gak, purchaseDate })
-    
-    if (!selectedStock || !shares || !gak || !purchaseDate) {
+    console.log('handleAddStock called', { selectedStock, shares, gak })
+
+    if (!selectedStock || !shares || !gak) {
       console.log('Missing required fields')
       return
     }
@@ -311,7 +310,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           categoryColor: 'bg-purple-500',
           shares: sharesNum,
           gak: gakNum,
-          purchase_date: purchaseDate,
+          purchase_date: new Date().toISOString().split('T')[0], // Use current date
           current_price: currentPrice,
           market_value: parseFloat(marketValue.toFixed(2)),
           profit_loss: parseFloat(profitLoss.toFixed(2)),
@@ -353,7 +352,6 @@ export default function FinanceView({ mode }: FinanceViewProps) {
       setSelectedStock(null)
       setShares('')
       setGak('')
-      setPurchaseDate('')
     } catch (error) {
       console.error('Error adding stock:', error)
       alert('Fejl ved tilføjelse af aktie: ' + error.message)
@@ -377,14 +375,13 @@ export default function FinanceView({ mode }: FinanceViewProps) {
     setSelectedStock({ symbol: stock.symbol, name: stock.name, price: stock.currentPrice, change: 0, changePercent: 0 })
     setShares(stock.shares.toString())
     setGak(stock.gak.toString())
-    setPurchaseDate(stock.purchaseDate)
     setShowAddModal(true)
   }
 
   const handleUpdateStock = async () => {
-    console.log('handleUpdateStock called', { editingStock, selectedStock, shares, gak, purchaseDate })
-    
-    if (!editingStock || !selectedStock || !shares || !gak || !purchaseDate) {
+    console.log('handleUpdateStock called', { editingStock, selectedStock, shares, gak })
+
+    if (!editingStock || !selectedStock || !shares || !gak) {
       console.log('Missing required fields for update')
       return
     }
@@ -403,7 +400,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
         symbol: selectedStock.symbol,
         shares: sharesNum,
         gak: gakNum,
-        purchase_date: purchaseDate,
+        purchase_date: new Date().toISOString().split('T')[0], // Use current date
         current_price: currentPrice,
         market_value: parseFloat(marketValue.toFixed(2)),
         profit_loss: parseFloat(profitLoss.toFixed(2)),
@@ -441,7 +438,6 @@ export default function FinanceView({ mode }: FinanceViewProps) {
       setSelectedStock(null)
       setShares('')
       setGak('')
-      setPurchaseDate('')
     } catch (error) {
       console.error('Error updating stock:', error)
       alert('Fejl ved opdatering af aktie: ' + error.message)
@@ -896,18 +892,6 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 />
               </div>
 
-              {/* Purchase Date Input */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Købsdato
-                </label>
-                <input
-                  type="date"
-                  value={purchaseDate}
-                  onChange={(e) => setPurchaseDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
 
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-4">
@@ -919,7 +903,6 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                     setSelectedStock(null)
                     setShares('')
                     setGak('')
-                    setPurchaseDate('')
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
@@ -927,7 +910,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                 </button>
                 <button
                   onClick={editingStock ? handleUpdateStock : handleAddStock}
-                  disabled={!selectedStock || !shares || !gak || !purchaseDate}
+                  disabled={!selectedStock || !shares || !gak}
                   className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {editingStock ? 'Opdater' : 'Tilføj'} Aktie
