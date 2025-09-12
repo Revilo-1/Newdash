@@ -3,10 +3,10 @@ import { supabase } from './supabaseClient'
 // Database service for MyDashboard
 export class DatabaseService {
   // User Management
-  static async createUser(email: string, name: string) {
+  static async createUser(email: string, name: string, role: string = 'user') {
     const { data, error } = await supabase
       .from('users')
-      .insert([{ email, name }])
+      .insert([{ email, name, role }])
       .select()
       .single()
     

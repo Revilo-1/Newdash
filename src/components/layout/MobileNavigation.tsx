@@ -20,13 +20,14 @@ import {
   Menu
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useAdmin } from '@/hooks/useAdmin'
 
-const getNavigation = (t: any) => [
+const getNavigation = (t: any, isAdmin: boolean = false) => [
   { name: t.navigation.dashboard, href: '/dashboard', icon: LayoutDashboard },
   { name: t.navigation.tasks, href: '/tasks', icon: Target },
   { name: t.navigation.healthWellness, href: '/health-wellness', icon: Heart, privateOnly: true },
   { name: t.navigation.finance, href: '/finance', icon: CreditCard, privateOnly: true },
-  { name: t.navigation.users, href: '/users', icon: Users },
+  ...(isAdmin ? [{ name: t.navigation.users, href: '/users', icon: Users, adminOnly: true }] : []),
   { name: t.navigation.aiIntegration, href: '/ai', icon: Zap },
   { name: t.navigation.api, href: '/api', icon: Key },
   { name: t.navigation.notifications, href: '/notifications', icon: Bell, comingSoon: true },
@@ -43,9 +44,10 @@ interface MobileNavigationProps {
 
 export default function MobileNavigation({ dashboardMode = 'private' }: MobileNavigationProps) {
   const { t } = useLanguage()
+  const { isAdmin } = useAdmin()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
-  const navigation = getNavigation(t)
+  const navigation = getNavigation(t, isAdmin)
   const others = getOthers(t)
 
   return (

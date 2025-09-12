@@ -7,9 +7,11 @@ import Sidebar from '@/components/layout/Sidebar'
 import Header from '@/components/layout/Header'
 import UserManagementView from '@/components/users/UserManagementView'
 import { DashboardMode } from '@/types/dashboard'
+import { useAdmin } from '@/hooks/useAdmin'
 
 export default function UsersPage() {
   const { data: session, status } = useSession()
+  const { isAdmin } = useAdmin()
   const [dashboardMode, setDashboardMode] = useState<DashboardMode>('private')
 
   if (status === 'loading') {
@@ -24,14 +26,14 @@ export default function UsersPage() {
     redirect('/auth/login')
   }
 
-  // Check if user is admin (only admin@lifedash.com can access)
-  if (session.user?.email !== 'admin@lifedash.com') {
+  // Check if user is admin
+  if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🔒</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
-          <p className="text-gray-600">You don't have permission to access this page.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Adgang Nægtet</h1>
+          <p className="text-gray-600">Du har ikke tilladelse til at tilgå denne side.</p>
         </div>
       </div>
     )

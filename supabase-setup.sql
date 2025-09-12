@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   name TEXT,
+  role TEXT DEFAULT 'user',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -134,9 +135,9 @@ CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON public.tasks(user_id);
 CREATE INDEX IF NOT EXISTS idx_calendar_events_user_id ON public.calendar_events(user_id);
 
 -- 11. Insert demo user
-INSERT INTO public.users (id, email, name) 
-VALUES ('550e8400-e29b-41d4-a716-446655440000', 'oliver@schrader.dk', 'Oliver Schrader')
-ON CONFLICT (email) DO NOTHING;
+INSERT INTO public.users (id, email, name, role) 
+VALUES ('550e8400-e29b-41d4-a716-446655440000', 'oliver@schrader.dk', 'Oliver Schrader', 'super_admin')
+ON CONFLICT (email) DO UPDATE SET role = 'super_admin';
 
 -- 12. Insert demo user profile
 INSERT INTO public.user_profiles (user_id, bio, preferences) 

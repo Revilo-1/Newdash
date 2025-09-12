@@ -22,13 +22,14 @@ export const authOptions: NextAuthOptions = {
             let user = await DatabaseService.getUserByEmail(credentials.email)
             
             if (!user) {
-              user = await DatabaseService.createUser(credentials.email, 'Oliver Schrader')
+              user = await DatabaseService.createUser(credentials.email, 'Oliver Schrader', 'super_admin')
             }
 
             return {
               id: user.id,
               email: user.email,
               name: user.name,
+              role: 'super_admin'
             }
           } catch (error) {
             console.error('Database error during login:', error)
@@ -37,6 +38,7 @@ export const authOptions: NextAuthOptions = {
               id: '550e8400-e29b-41d4-a716-446655440000',
               email: 'oliver@schrader.dk',
               name: 'Oliver Schrader',
+              role: 'super_admin'
             }
           }
         }
@@ -55,12 +57,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
+        token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string
+        session.user.role = token.role as string
       }
       return session
     }
