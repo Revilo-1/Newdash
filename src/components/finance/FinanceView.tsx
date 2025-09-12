@@ -46,6 +46,7 @@ interface Stock {
   marketValue: number
   profitLoss: number
   profitLossPercent: number
+  currency: 'USD' | 'DKK' // Currency for this stock
 }
 
 interface SearchResult {
@@ -101,6 +102,7 @@ const upcomingPayments = [
 ]
 
 // Oliver's real stock holdings from Nordnet
+// Note: CoreWeave and Opendoor are USD stocks, Novo Nordisk is DKK
 const initialStocks: Stock[] = [
   {
     id: '1',
@@ -113,9 +115,10 @@ const initialStocks: Stock[] = [
     gak: 97.12,
     purchaseDate: '2024-01-15',
     currentPrice: 111.96,
-    marketValue: 10076.40, // 90 * 111.96
-    profitLoss: 1335.60, // 10076.40 - (90 * 97.12)
-    profitLossPercent: 15.28 // (1335.60 / (90 * 97.12)) * 100
+    marketValue: 10076.40,
+    profitLoss: 1335.60,
+    profitLossPercent: 15.28,
+    currency: 'USD'
   },
   {
     id: '2',
@@ -128,9 +131,10 @@ const initialStocks: Stock[] = [
     gak: 424.29,
     purchaseDate: '2024-02-20',
     currentPrice: 348.30,
-    marketValue: 24032.70, // 69 * 348.30
-    profitLoss: -5244.51, // 24032.70 - (69 * 424.29)
-    profitLossPercent: -17.91 // (-5244.51 / (69 * 424.29)) * 100
+    marketValue: 24032.70,
+    profitLoss: -5244.51,
+    profitLossPercent: -17.91,
+    currency: 'DKK'
   },
   {
     id: '3',
@@ -143,9 +147,10 @@ const initialStocks: Stock[] = [
     gak: 351.53,
     purchaseDate: '2024-03-10',
     currentPrice: 348.30,
-    marketValue: 67918.50, // 195 * 348.30
-    profitLoss: -629.85, // 67918.50 - (195 * 351.53)
-    profitLossPercent: -0.92 // (-629.85 / (195 * 351.53)) * 100
+    marketValue: 67918.50,
+    profitLoss: -629.85,
+    profitLossPercent: -0.92,
+    currency: 'DKK'
   },
   {
     id: '4',
@@ -158,24 +163,26 @@ const initialStocks: Stock[] = [
     gak: 4.37,
     purchaseDate: '2024-04-05',
     currentPrice: 9.07,
-    marketValue: 3809.40, // 420 * 9.07
-    profitLoss: 1974.00, // 3809.40 - (420 * 4.37)
-    profitLossPercent: 107.58 // (1974.00 / (420 * 4.37)) * 100
+    marketValue: 3809.40,
+    profitLoss: 1974.00,
+    profitLossPercent: 107.58,
+    currency: 'USD'
   }
 ]
 
 // Mock search results for stock search
+// Note: US stocks in USD, Danish stocks in DKK
 const mockSearchResults: SearchResult[] = [
-  { symbol: 'CW', name: 'CoreWeave', price: 111.96, change: -0.73, changePercent: -0.65 },
-  { symbol: 'NOVO-B', name: 'Novo Nordisk B A/S', price: 348.30, change: 2.40, changePercent: 0.69 },
-  { symbol: 'OPEN', name: 'Opendoor Technologies', price: 9.07, change: -1.45, changePercent: -13.78 },
-  { symbol: 'TSLA', name: 'Tesla', price: 395.94, change: 27.12, changePercent: 7.36 },
-  { symbol: 'ZEAL', name: 'Zealand Pharma A/S', price: 412.40, change: -17.80, changePercent: -4.14 },
-  { symbol: 'MAERSK-B', name: 'A.P. Møller - Mærsk', price: 12450, change: -180, changePercent: -1.43 },
-  { symbol: 'DSV', name: 'DSV', price: 1250, change: 25, changePercent: 2.04 },
-  { symbol: 'ORSTED', name: 'Ørsted', price: 426, change: -8, changePercent: -1.84 },
-  { symbol: 'CARL-B', name: 'Carlsberg', price: 980, change: 15, changePercent: 1.55 },
-  { symbol: 'VWS', name: 'Vestas Wind Systems', price: 185.5, change: 3.2, changePercent: 1.75 }
+  { symbol: 'CW', name: 'CoreWeave', price: 111.96, change: -0.73, changePercent: -0.65 }, // USD
+  { symbol: 'NOVO-B', name: 'Novo Nordisk B A/S', price: 348.30, change: 2.40, changePercent: 0.69 }, // DKK
+  { symbol: 'OPEN', name: 'Opendoor Technologies', price: 9.07, change: -1.45, changePercent: -13.78 }, // USD
+  { symbol: 'TSLA', name: 'Tesla', price: 395.94, change: 27.12, changePercent: 7.36 }, // USD
+  { symbol: 'ZEAL', name: 'Zealand Pharma A/S', price: 412.40, change: -17.80, changePercent: -4.14 }, // DKK
+  { symbol: 'MAERSK-B', name: 'A.P. Møller - Mærsk', price: 12450, change: -180, changePercent: -1.43 }, // DKK
+  { symbol: 'DSV', name: 'DSV', price: 1250, change: 25, changePercent: 2.04 }, // DKK
+  { symbol: 'ORSTED', name: 'Ørsted', price: 426, change: -8, changePercent: -1.84 }, // DKK
+  { symbol: 'CARL-B', name: 'Carlsberg', price: 980, change: 15, changePercent: 1.55 }, // DKK
+  { symbol: 'VWS', name: 'Vestas Wind Systems', price: 185.5, change: 3.2, changePercent: 1.75 } // DKK
 ]
 
 export default function FinanceView({ mode }: FinanceViewProps) {
@@ -276,6 +283,14 @@ export default function FinanceView({ mode }: FinanceViewProps) {
         const profitLoss = marketValue - totalCost
         const profitLossPercent = (profitLoss / totalCost) * 100
 
+        // Determine currency based on stock symbol/name
+        const isUSDStock = selectedStock.symbol.includes('TSLA') || 
+                          selectedStock.symbol.includes('OPEN') || 
+                          selectedStock.symbol.includes('CW') ||
+                          selectedStock.name.toLowerCase().includes('tesla') ||
+                          selectedStock.name.toLowerCase().includes('opendoor') ||
+                          selectedStock.name.toLowerCase().includes('coreweave')
+        
         const stockData = {
           name: selectedStock.name,
           symbol: selectedStock.symbol,
@@ -288,7 +303,8 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           current_price: currentPrice,
           market_value: parseFloat(marketValue.toFixed(2)),
           profit_loss: parseFloat(profitLoss.toFixed(2)),
-          profit_loss_percent: parseFloat(profitLossPercent.toFixed(2))
+          profit_loss_percent: parseFloat(profitLossPercent.toFixed(2)),
+          currency: isUSDStock ? 'USD' : 'DKK'
         }
 
       console.log('Saving stock data:', stockData)
@@ -313,7 +329,8 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           currentPrice: parseFloat(stockData.current_price.toFixed(2)),
           marketValue: parseFloat(stockData.market_value.toFixed(2)),
           profitLoss: parseFloat(stockData.profit_loss.toFixed(2)),
-          profitLossPercent: parseFloat(stockData.profit_loss_percent.toFixed(2))
+          profitLossPercent: parseFloat(stockData.profit_loss_percent.toFixed(2)),
+          currency: stockData.currency
         }
         setStocks(prev => [newStock, ...prev])
         console.log('Stock added locally')
