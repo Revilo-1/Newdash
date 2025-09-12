@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Search, 
   Bell, 
@@ -27,20 +27,20 @@ interface FinanceViewProps {
   mode: DashboardMode
 }
 
-// Sample data for expenses chart
-const expensesData = [
-  { month: 'Jan', amount: 8500 },
-  { month: 'Feb', amount: 9200 },
-  { month: 'Mar', amount: 7800 },
-  { month: 'Apr', amount: 10500 },
-  { month: 'May', amount: 9800 },
-  { month: 'Jun', amount: 10512 },
-  { month: 'Jul', amount: 11200 },
-  { month: 'Aug', amount: 10800 },
-  { month: 'Sep', amount: 12500 },
-  { month: 'Oct', amount: 11800 },
-  { month: 'Nov', amount: 13200 },
-  { month: 'Dec', amount: 12800 }
+// Mock Nordnet portfolio data
+const portfolioData = [
+  { month: 'Jan', amount: 285000 },
+  { month: 'Feb', amount: 292000 },
+  { month: 'Mar', amount: 278000 },
+  { month: 'Apr', amount: 295000 },
+  { month: 'May', amount: 305000 },
+  { month: 'Jun', amount: 300000 },
+  { month: 'Jul', amount: 312000 },
+  { month: 'Aug', amount: 308000 },
+  { month: 'Sep', amount: 325000 },
+  { month: 'Oct', amount: 318000 },
+  { month: 'Nov', amount: 332000 },
+  { month: 'Dec', amount: 328000 }
 ]
 
 // Sample upcoming payments
@@ -71,43 +71,115 @@ const upcomingPayments = [
   }
 ]
 
-// Sample recent transactions
-const recentTransactions = [
+// Mock Danish stock holdings
+const stockHoldings = [
   {
     id: '1',
-    name: 'Shopee',
-    logo: '🛒',
-    time: 'Today, 08:21',
-    category: 'Beverage & Snacks',
-    categoryColor: 'bg-purple-500',
-    amount: '-$28.00',
-    type: 'expense'
+    name: 'Novo Nordisk',
+    symbol: 'NOVO-B',
+    logo: '💊',
+    time: 'Live',
+    category: 'Healthcare',
+    categoryColor: 'bg-blue-500',
+    amount: '+42.500 kr',
+    type: 'profit',
+    change: '+1.2%',
+    shares: '50 aktier'
   },
   {
     id: '2',
-    name: 'Walmart',
-    logo: '🏪',
-    time: 'Today, 09:10',
-    category: 'Groceries',
+    name: 'A.P. Møller - Mærsk',
+    symbol: 'MAERSK-B',
+    logo: '🚢',
+    time: 'Live',
+    category: 'Transportation',
     categoryColor: 'bg-orange-500',
-    amount: '-$152.00',
-    type: 'expense'
+    amount: '+99.600 kr',
+    type: 'profit',
+    change: '-1.4%',
+    shares: '8 aktier'
   },
   {
     id: '3',
-    name: 'Gojek',
-    logo: '🚗',
-    time: 'Yesterday, 21:45',
+    name: 'DSV',
+    symbol: 'DSV',
+    logo: '📦',
+    time: 'Live',
     category: 'Transportation',
     categoryColor: 'bg-green-500',
-    amount: '-$97.00',
-    type: 'expense'
+    amount: '+50.000 kr',
+    type: 'profit',
+    change: '+2.1%',
+    shares: '40 aktier'
+  },
+  {
+    id: '4',
+    name: 'Ørsted',
+    symbol: 'ORSTED',
+    logo: '🌱',
+    time: 'Live',
+    category: 'Energy',
+    categoryColor: 'bg-emerald-500',
+    amount: '+42.600 kr',
+    type: 'profit',
+    change: '-1.9%',
+    shares: '100 aktier'
+  },
+  {
+    id: '5',
+    name: 'Carlsberg',
+    symbol: 'CARL-B',
+    logo: '🍺',
+    time: 'Live',
+    category: 'Consumer Goods',
+    categoryColor: 'bg-amber-500',
+    amount: '+29.400 kr',
+    type: 'profit',
+    change: '+1.6%',
+    shares: '30 aktier'
+  },
+  {
+    id: '6',
+    name: 'Vestas Wind Systems',
+    symbol: 'VWS',
+    logo: '🌪️',
+    time: 'Live',
+    category: 'Energy',
+    categoryColor: 'bg-teal-500',
+    amount: '+37.100 kr',
+    type: 'profit',
+    change: '+1.8%',
+    shares: '200 aktier'
   }
 ]
 
 export default function FinanceView({ mode }: FinanceViewProps) {
   const { t } = useLanguage()
   const [selectedTimeframe, setSelectedTimeframe] = useState('1Y')
+  const [liveHoldings, setLiveHoldings] = useState(stockHoldings)
+
+  // Simulate real-time price updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLiveHoldings(prevHoldings => 
+        prevHoldings.map(holding => {
+          // Simulate small price changes
+          const change = (Math.random() - 0.5) * 0.02 // ±1% change
+          const currentValue = parseFloat(holding.amount.replace(/[^\d]/g, ''))
+          const newValue = Math.max(0, currentValue + (currentValue * change))
+          const newChange = change > 0 ? `+${(change * 100).toFixed(1)}%` : `${(change * 100).toFixed(1)}%`
+          
+          return {
+            ...holding,
+            amount: `+${newValue.toLocaleString('da-DK')} kr`,
+            change: newChange
+          }
+        })
+      )
+    }, 5000) // Update every 5 seconds
+
+    return () => clearInterval(interval)
+  }, [])
 
   // Only show this page for private dashboard
   if (mode !== 'private') {
@@ -182,10 +254,10 @@ export default function FinanceView({ mode }: FinanceViewProps) {
               </div>
             </div>
 
-            {/* Net Worth */}
+            {/* Portfolio Value */}
             <div className="mb-6">
-              <p className="text-3xl font-bold text-gray-900">$14,732.80</p>
-              <p className="text-sm text-gray-600">Net Worth</p>
+              <p className="text-3xl font-bold text-gray-900">301.200 kr</p>
+              <p className="text-sm text-gray-600">Portefølje Værdi</p>
             </div>
 
             {/* Virtual Card */}
@@ -291,7 +363,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={expensesData}>
+                <LineChart data={portfolioData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis 
                     dataKey="month" 
@@ -314,7 +386,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                       fontSize: '12px',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                     }}
-                    formatter={(value) => [`$${value.toLocaleString()}`, 'Udgifter']}
+                    formatter={(value) => [`${value.toLocaleString()} kr`, 'Portefølje Værdi']}
                   />
                   <Line 
                     type="monotone" 
@@ -329,8 +401,8 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">300.000 kr</p>
-              <p className="text-sm text-green-600">+8.2% vs sidste år</p>
+              <p className="text-2xl font-bold text-gray-900">301.200 kr</p>
+              <p className="text-sm text-green-600">+5.7% vs sidste år</p>
             </div>
           </div>
 
@@ -342,9 +414,9 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                   <ArrowUpRight className="h-6 w-6 text-blue-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Transaktioner</p>
-                  <p className="text-2xl font-bold text-gray-900">312</p>
-                  <p className="text-xs text-gray-500">Total transaktioner denne måned</p>
+                  <p className="text-sm font-medium text-gray-600">Total Aktier</p>
+                  <p className="text-2xl font-bold text-gray-900">6</p>
+                  <p className="text-xs text-gray-500">Aktier i porteføljen</p>
                 </div>
               </div>
             </div>
@@ -355,31 +427,31 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                   <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Indtægt</p>
-                  <p className="text-2xl font-bold text-green-600">+$17,746.61</p>
-                  <p className="text-xs text-gray-500">Kumulativ indtægt optjent</p>
+                  <p className="text-sm font-medium text-gray-600">Portefølje Værdi</p>
+                  <p className="text-2xl font-bold text-green-600">+301.200 kr</p>
+                  <p className="text-xs text-gray-500">Total portefølje værdi</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center">
-                <div className="p-2 bg-red-100 rounded-lg">
-                  <TrendingDown className="h-6 w-6 text-red-600" />
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Udgift</p>
-                  <p className="text-2xl font-bold text-red-600">-$5,987.35</p>
-                  <p className="text-xs text-gray-500">Kumulativ udgift</p>
+                  <p className="text-sm font-medium text-gray-600">Dagens Gevinst</p>
+                  <p className="text-2xl font-bold text-green-600">+1.200 kr</p>
+                  <p className="text-xs text-gray-500">+0.4% i dag</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Recent Transactions */}
+          {/* Stock Holdings */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Seneste Transaktioner</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Aktie Holdings</h2>
               <div className="flex items-center space-x-2">
                 <button className="p-2 text-gray-400 hover:text-gray-600">
                   <Search className="h-4 w-4" />
@@ -391,26 +463,27 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
 
             <div className="mb-4">
-              <p className="text-sm font-medium text-gray-600">May 23, 2025</p>
+              <p className="text-sm font-medium text-gray-600">Live priser - Opdateret nu</p>
             </div>
 
             <div className="space-y-4">
-              {recentTransactions.map((transaction) => (
-                <div key={transaction.id} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+              {liveHoldings.map((holding) => (
+                <div key={holding.id} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg transition-colors">
                   <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center text-lg">
-                    {transaction.logo}
+                    {holding.logo}
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{transaction.name}</p>
-                    <p className="text-sm text-gray-600">{transaction.time}</p>
+                    <p className="font-medium text-gray-900">{holding.name}</p>
+                    <p className="text-sm text-gray-600">{holding.symbol} • {holding.shares}</p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className={`w-3 h-3 ${transaction.categoryColor} rounded-sm`}></div>
-                    <span className="text-sm text-gray-600">{transaction.category}</span>
+                    <div className={`w-3 h-3 ${holding.categoryColor} rounded-sm`}></div>
+                    <span className="text-sm text-gray-600">{holding.category}</span>
                   </div>
                   <div className="text-right">
-                    <p className={`font-semibold ${transaction.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
-                      {transaction.amount}
+                    <p className="font-semibold text-gray-900">{holding.amount}</p>
+                    <p className={`text-sm ${holding.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                      {holding.change}
                     </p>
                   </div>
                   <button className="p-1 text-gray-400 hover:text-gray-600">
