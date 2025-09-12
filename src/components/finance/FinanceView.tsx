@@ -271,7 +271,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           {/* Expenses Chart */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Udgifter</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Nordnet</h2>
               <div className="flex items-center space-x-2">
                 {timeframes.map((timeframe) => (
                   <button
@@ -329,7 +329,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
 
             <div className="mt-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">$10,512</p>
+              <p className="text-2xl font-bold text-gray-900">300.000 kr</p>
               <p className="text-sm text-green-600">+8.2% vs sidste år</p>
             </div>
           </div>
