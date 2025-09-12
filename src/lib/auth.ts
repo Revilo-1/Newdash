@@ -15,11 +15,11 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Demo user - simple check for demo purposes
-        if (credentials.email === 'admin@lifedash.com' && credentials.password === 'password123') {
+        if (credentials.email === 'demoen@outlook.dk' && credentials.password === 'password123') {
           return {
             id: '1',
-            email: 'admin@lifedash.com',
-            name: 'DemoAdmin',
+            email: 'demoen@outlook.dk',
+            name: 'Demo User',
           }
         }
 

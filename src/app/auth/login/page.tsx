@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { signIn } from 'next-auth/react'
 import { Eye, EyeOff, Mail, Lock, Rocket } from 'lucide-react'
-import { supabase } from '@/lib/supabaseClient'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -13,49 +13,30 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
 
-  // Test Supabase connection on component mount
-  useEffect(() => {
-    const testConnection = async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession()
-        if (error) {
-          console.error('Supabase connection test failed:', error)
-        } else {
-          console.log('Supabase connection successful')
-        }
-      } catch (err) {
-        console.error('Supabase connection error:', err)
-      }
-    }
-    
-    testConnection()
-  }, [])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password 
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false
       })
 
-      if (error) {
-        console.error('Supabase auth error:', error)
-        setError(error.message || 'Invalid email or password')
+      if (result?.error) {
+        setError('Invalid email or password')
         setIsLoading(false)
         return
       }
 
-      if (data.user) {
-        console.log('Login successful:', data.user)
+      if (result?.ok) {
         router.push('/dashboard')
       }
     } catch (err) {
       console.error('Login error:', err)
-      setError('Failed to connect to authentication service. Please try again.')
+      setError('Login failed. Please try again.')
       setIsLoading(false)
     }
   }
