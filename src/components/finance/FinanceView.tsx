@@ -601,16 +601,6 @@ export default function FinanceView({ mode }: FinanceViewProps) {
               <p className="text-sm text-gray-600 mt-2">Portefølje Værdi</p>
             </div>
 
-            {/* Virtual Card */}
-            <div className="bg-gradient-to-r from-green-400 to-green-500 rounded-xl p-6 mb-6 text-white">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium">Ucok Sayuti</span>
-                <span className="text-sm font-bold">VISA</span>
-              </div>
-              <div className="text-xl font-bold tracking-wider">
-                3255 3422 6456 4634
-              </div>
-            </div>
 
             {/* Quick Actions */}
             <div className="grid grid-cols-5 gap-4">
