@@ -180,6 +180,50 @@ export class DatabaseService {
     if (error) throw error
     return data
   }
+
+  // User Profile Management
+  static async getUserProfile(userId: string) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single()
+    
+    if (error && error.code !== 'PGRST116') throw error
+    return data
+  }
+
+  static async saveUserProfile(userId: string, profileData: any) {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .upsert([{ 
+        user_id: userId, 
+        first_name: profileData.firstName,
+        last_name: profileData.lastName,
+        phone: profileData.phone,
+        location: profileData.location,
+        bio: profileData.bio,
+        birthday: profileData.birthday,
+        website: profileData.website
+      }])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
+  static async updateUser(userId: string, userData: any) {
+    const { data, error } = await supabase
+      .from('users')
+      .update(userData)
+      .eq('id', userId)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
 }
 
 export default DatabaseService

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { 
   User, 
   Bell, 
@@ -21,6 +22,7 @@ import {
   Upload
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { DatabaseService } from '@/lib/database'
 
 interface SettingsSection {
   id: string
@@ -64,22 +66,25 @@ const getSettingsSections = (t: any): SettingsSection[] => [
 
 export default function SettingsView() {
   const { t, language, setLanguage } = useLanguage()
+  const { data: session } = useSession()
   const [activeSection, setActiveSection] = useState('profile')
   const [showPassword, setShowPassword] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
 
   // Form states
   const [profileData, setProfileData] = useState({
-    firstName: 'Demo',
-    lastName: 'Admin',
-    email: 'admin@lifedash.com',
-    phone: '+45 12 34 56 78',
-    location: 'Copenhagen, Denmark',
-    bio: 'Passionate about health, wellness, and productivity. Building a better life through technology.',
-    birthday: '1990-01-15',
-    website: 'https://lifedash.com'
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    location: '',
+    bio: '',
+    birthday: '',
+    website: ''
   })
 
   const [accountData, setAccountData] = useState({
@@ -120,18 +125,96 @@ export default function SettingsView() {
     dataRetention: '2'
   })
 
-  const handleSave = (section: string) => {
-    // Here you would typically save to your backend
-    console.log(`Saving ${section} settings:`, {
-      profile: profileData,
-      account: accountData,
-      notifications: notificationData,
-      appearance: appearanceData,
-      privacy: privacyData
-    })
+  // Load user data on component mount
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!session?.user?.id) return
+      
+      try {
+        setIsLoading(true)
+        
+        // Load user profile data
+        const userProfile = await DatabaseService.getUserProfile(session.user.id)
+        
+        if (userProfile) {
+          setProfileData({
+            firstName: userProfile.first_name || '',
+            lastName: userProfile.last_name || '',
+            email: session.user.email || '',
+            phone: userProfile.phone || '',
+            location: userProfile.location || '',
+            bio: userProfile.bio || '',
+            birthday: userProfile.birthday || '',
+            website: userProfile.website || ''
+          })
+        } else {
+          // Set default values from session
+          setProfileData(prev => ({
+            ...prev,
+            email: session.user.email || '',
+            firstName: session.user.name?.split(' ')[0] || '',
+            lastName: session.user.name?.split(' ').slice(1).join(' ') || ''
+          }))
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error)
+        // Set default values from session
+        setProfileData(prev => ({
+          ...prev,
+          email: session.user.email || '',
+          firstName: session.user.name?.split(' ')[0] || '',
+          lastName: session.user.name?.split(' ').slice(1).join(' ') || ''
+        }))
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadUserData()
+  }, [session])
+
+  const handleSave = async (section: string) => {
+    if (!session?.user?.id) return
     
-    // Show success message (you could add a toast notification here)
-    alert(`${section} settings saved successfully!`)
+    try {
+      setIsSaving(true)
+      
+      if (section === 'profile') {
+        // Save profile data to user_profiles table
+        await DatabaseService.saveUserProfile(session.user.id, {
+          firstName: profileData.firstName,
+          lastName: profileData.lastName,
+          phone: profileData.phone,
+          location: profileData.location,
+          bio: profileData.bio,
+          birthday: profileData.birthday,
+          website: profileData.website
+        })
+        
+        // Update user table with name if changed
+        if (profileData.firstName || profileData.lastName) {
+          await DatabaseService.updateUser(session.user.id, {
+            name: `${profileData.firstName} ${profileData.lastName}`.trim()
+          })
+        }
+      }
+      
+      // For other sections, you can add similar logic
+      console.log(`Saving ${section} settings:`, {
+        profile: profileData,
+        account: accountData,
+        notifications: notificationData,
+        appearance: appearanceData,
+        privacy: privacyData
+      })
+      
+      alert(`${section} settings saved successfully!`)
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      alert('Error saving settings. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   const renderProfileSection = () => (
@@ -618,6 +701,14 @@ export default function SettingsView() {
 
   const settingsSections = getSettingsSections(t)
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6">
       {/* Breadcrumbs */}
@@ -689,10 +780,11 @@ export default function SettingsView() {
               <div className="flex justify-end">
                 <button
                   onClick={() => handleSave(activeSection)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  disabled={isSaving || isLoading}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  {t.settings.saveChanges}
+                  {isSaving ? 'Saving...' : t.settings.saveChanges}
                 </button>
               </div>
             </div>

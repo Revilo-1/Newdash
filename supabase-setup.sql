@@ -16,7 +16,13 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   avatar_url TEXT,
+  first_name TEXT,
+  last_name TEXT,
+  phone TEXT,
+  location TEXT,
   bio TEXT,
+  birthday DATE,
+  website TEXT,
   preferences JSONB DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
