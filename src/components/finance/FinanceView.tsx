@@ -28,6 +28,7 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { useUserData } from '@/hooks/useUserData'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { StockHolding } from '@/lib/stockApi'
+import CarLoanView from './CarLoanView'
 
 interface FinanceViewProps {
   mode: DashboardMode
@@ -237,6 +238,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const [stocks, setStocks] = useState<Stock[]>([])
   const [portfolioLoading, setPortfolioLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [activeTab, setActiveTab] = useState<'stocks' | 'car-loans'>('stocks')
   
   // Load portfolio with live prices
   const loadPortfolio = async () => {
@@ -560,6 +562,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
         <div>
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Økonomi</h1>
+          <p className="text-gray-600">Administrer dine aktier og billån</p>
         </div>
         <div className="flex items-center space-x-3">
           <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
@@ -575,7 +578,35 @@ export default function FinanceView({ mode }: FinanceViewProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('stocks')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'stocks'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Aktieportefølje
+          </button>
+          <button
+            onClick={() => setActiveTab('car-loans')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'car-loans'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Billån
+          </button>
+        </nav>
+      </div>
+
+      {/* Conditional Content */}
+      {activeTab === 'stocks' ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - My Card & Upcoming Payments */}
         <div className="lg:col-span-1 space-y-6">
           {/* My Card Section */}
@@ -1018,6 +1049,9 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             </div>
           </div>
         </div>
+      )}
+      ) : (
+        <CarLoanView />
       )}
     </div>
   )
