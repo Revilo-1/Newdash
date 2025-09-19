@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { 
   Plus, 
   Search, 
@@ -22,59 +22,54 @@ import {
   Clock,
   Settings,
   Download,
-  Upload
+  Upload,
+  RefreshCw
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { User, UserRole, UserStatus, Permission, CreateUserData, UpdateUserData } from '@/types/user'
 
-// Sample data - in a real app this would come from your database
-const sampleUsers: User[] = [
-  {
-    id: '1',
-    email: 'admin@lifedash.com',
-    name: 'Demo Admin',
-    role: 'admin',
-    status: 'active',
-    permissions: [],
-    createdAt: new Date('2024-01-01'),
-    lastLogin: new Date('2024-01-15'),
-    department: 'IT',
-    phone: '+45 12 34 56 78'
-  },
-  {
-    id: '2',
-    email: 'manager@lifedash.com',
-    name: 'Sarah Johnson',
-    role: 'manager',
-    status: 'active',
-    permissions: [],
-    createdAt: new Date('2024-01-05'),
-    lastLogin: new Date('2024-01-14'),
-    department: 'Sales',
-    phone: '+45 23 45 67 89'
-  },
-  {
-    id: '3',
-    email: 'user@lifedash.com',
-    name: 'Mike Wilson',
-    role: 'user',
-    status: 'active',
-    permissions: [],
-    createdAt: new Date('2024-01-10'),
-    lastLogin: new Date('2024-01-13'),
-    department: 'Marketing'
-  },
-  {
-    id: '4',
-    email: 'viewer@lifedash.com',
-    name: 'Lisa Davis',
-    role: 'viewer',
-    status: 'inactive',
-    permissions: [],
-    createdAt: new Date('2024-01-12'),
-    department: 'HR'
-  }
-]
+// API functions for user management
+const fetchUsers = async () => {
+  const response = await fetch('/api/admin/users')
+  if (!response.ok) throw new Error('Failed to fetch users')
+  const data = await response.json()
+  return data.users
+}
+
+const inviteUser = async (userData: { email: string; name: string; role: string }) => {
+  const response = await fetch('/api/admin/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(userData)
+  })
+  if (!response.ok) throw new Error('Failed to invite user')
+  return response.json()
+}
+
+const deleteUser = async (userId: string) => {
+  const response = await fetch(`/api/admin/users/${userId}`, {
+    method: 'DELETE'
+  })
+  if (!response.ok) throw new Error('Failed to delete user')
+  return response.json()
+}
+
+const updateUserRole = async (userId: string, role: string) => {
+  const response = await fetch(`/api/admin/users/${userId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ role })
+  })
+  if (!response.ok) throw new Error('Failed to update user role')
+  return response.json()
+}
+
+const fetchStats = async () => {
+  const response = await fetch('/api/admin/stats')
+  if (!response.ok) throw new Error('Failed to fetch stats')
+  const data = await response.json()
+  return data.stats
+}
 
 const availablePermissions: Permission[] = [
   { id: 'dashboard_view', name: 'View Dashboard', description: 'Access to main dashboard', category: 'dashboard' },
@@ -104,7 +99,15 @@ const rolePermissions: Record<UserRole, string[]> = {
 
 export default function UserManagementView() {
   const { t } = useLanguage()
-  const [users, setUsers] = useState<User[]>(sampleUsers)
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeUsers: 0,
+    adminUsers: 0,
+    recentSignups: 0
+  })
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<UserStatus | 'all'>('all')
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
@@ -121,6 +124,83 @@ export default function UserManagementView() {
   })
 
   const [editUser, setEditUser] = useState<UpdateUserData>({})
+
+  // Load users and stats on component mount
+  useEffect(() => {
+    loadData()
+  }, [])
+
+  const loadData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const [usersData, statsData] = await Promise.all([
+        fetchUsers(),
+        fetchStats()
+      ])
+      
+      // Transform API data to match our User interface
+      const transformedUsers = usersData.map((user: any) => ({
+        id: user.id,
+        email: user.email,
+        name: user.name || '',
+        role: user.role as UserRole,
+        status: user.email_confirmed_at ? 'active' : 'pending' as UserStatus,
+        permissions: rolePermissions[user.role as UserRole] || [],
+        createdAt: new Date(user.created_at),
+        lastLogin: user.last_sign_in_at ? new Date(user.last_sign_in_at) : null,
+        department: '',
+        phone: ''
+      }))
+      
+      setUsers(transformedUsers)
+      setStats(statsData)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInviteUser = async () => {
+    try {
+      await inviteUser({
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role
+      })
+      
+      setShowCreateModal(false)
+      setNewUser({ email: '', name: '', role: 'user', permissions: [] })
+      await loadData() // Refresh the list
+      alert('User invited successfully!')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to invite user')
+    }
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return
+    
+    try {
+      await deleteUser(userId)
+      await loadData() // Refresh the list
+      alert('User deleted successfully!')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to delete user')
+    }
+  }
+
+  const handleUpdateUserRole = async (userId: string, newRole: string) => {
+    try {
+      await updateUserRole(userId, newRole)
+      await loadData() // Refresh the list
+      alert('User role updated successfully!')
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update user role')
+    }
+  }
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -158,41 +238,15 @@ export default function UserManagementView() {
   }
 
   const handleCreateUser = () => {
-    if (newUser.email && newUser.name) {
-      const user: User = {
-        id: Date.now().toString(),
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-        status: 'pending',
-        permissions: newUser.permissions,
-        createdAt: new Date(),
-        department: newUser.department,
-        phone: newUser.phone,
-        notes: newUser.notes
-      }
-      setUsers([...users, user])
-      setNewUser({ email: '', name: '', role: 'user', permissions: [] })
-      setShowCreateModal(false)
-    }
+    handleInviteUser()
   }
 
   const handleUpdateUser = () => {
-    if (selectedUser) {
-      setUsers(users.map(user => 
-        user.id === selectedUser.id 
-          ? { ...user, ...editUser }
-          : user
-      ))
+    if (selectedUser && editUser.role) {
+      handleUpdateUserRole(selectedUser.id, editUser.role)
       setShowEditModal(false)
       setSelectedUser(null)
       setEditUser({})
-    }
-  }
-
-  const handleDeleteUser = (userId: string) => {
-    if (confirm('Are you sure you want to delete this user?')) {
-      setUsers(users.filter(user => user.id !== userId))
     }
   }
 
@@ -231,13 +285,23 @@ export default function UserManagementView() {
           <h1 className="text-3xl font-bold text-gray-900">{t.userManagement.title}</h1>
           <p className="mt-2 text-gray-600">{t.userManagement.subtitle}</p>
         </div>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <UserPlus className="h-4 w-4 mr-2" />
-          {t.userManagement.addUser}
-        </button>
+        <div className="flex space-x-3">
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            {t.userManagement.addUser}
+          </button>
+        </div>
       </div>
 
       {/* Stats Cards */}
@@ -249,7 +313,7 @@ export default function UserManagementView() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t.userManagement.totalUsers}</p>
-              <p className="text-2xl font-bold text-gray-900">{users.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
             </div>
           </div>
         </div>
@@ -260,7 +324,7 @@ export default function UserManagementView() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t.userManagement.activeUsers}</p>
-              <p className="text-2xl font-bold text-gray-900">{users.filter(u => u.status === 'active').length}</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.activeUsers}</p>
             </div>
           </div>
         </div>
@@ -271,7 +335,7 @@ export default function UserManagementView() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t.userManagement.admins}</p>
-              <p className="text-2xl font-bold text-gray-900">{users.filter(u => u.role === 'admin').length}</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.adminUsers}</p>
             </div>
           </div>
         </div>
@@ -282,7 +346,7 @@ export default function UserManagementView() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">{t.userManagement.pending}</p>
-              <p className="text-2xl font-bold text-gray-900">{users.filter(u => u.status === 'pending').length}</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.recentSignups}</p>
             </div>
           </div>
         </div>
@@ -355,7 +419,41 @@ export default function UserManagementView() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="flex items-center justify-center">
+                      <RefreshCw className="h-6 w-6 animate-spin text-blue-500 mr-2" />
+                      <span className="text-gray-500">Loading users...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="text-red-500">
+                      <AlertCircle className="h-6 w-6 mx-auto mb-2" />
+                      <p>{error}</p>
+                      <button 
+                        onClick={loadData}
+                        className="mt-2 text-blue-500 hover:text-blue-700"
+                      >
+                        Try again
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-12 text-center">
+                    <div className="text-gray-500">
+                      <User className="h-6 w-6 mx-auto mb-2" />
+                      <p>No users found</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredUsers.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -419,7 +517,8 @@ export default function UserManagementView() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
