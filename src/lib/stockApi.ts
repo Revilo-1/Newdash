@@ -34,6 +34,7 @@ export interface StockHolding {
   dailyChange?: number
   dailyChangeDKK?: number
   dailyChangePercent?: number
+  gakDKK?: number // GAK converted to DKK
 }
 
 export class StockApiService {
@@ -275,8 +276,12 @@ export class StockApiService {
         const currentPriceDKK = currentPrice * exchangeRate
         const marketValue = currentPrice * holding.shares
         const marketValueDKK = marketValue * exchangeRate
+        
+        // Calculate GAK values - convert to DKK if needed
         const gakValue = holding.gak * holding.shares
         const gakValueDKK = gakValue * (holding.gakCurrency === 'DKK' ? 1 : exchangeRate)
+        const gakDKK = holding.gak * (holding.gakCurrency === 'DKK' ? 1 : exchangeRate)
+        
         const profitLoss = marketValue - gakValue
         const profitLossDKK = marketValueDKK - gakValueDKK
         const profitLossPercent = (profitLoss / gakValue) * 100
@@ -295,7 +300,8 @@ export class StockApiService {
           profitLossPercent,
           dailyChange,
           dailyChangeDKK,
-          dailyChangePercent
+          dailyChangePercent,
+          gakDKK
         })
       } catch (error) {
         console.error(`Error calculating value for ${holding.symbol}:`, error)

@@ -37,6 +37,7 @@ interface Stock extends StockHolding {
   logo: string
   categoryColor: string
   purchaseDate: string // Still used internally for database
+  gakDKK?: number // GAK converted to DKK
 }
 
 interface SearchResult {
@@ -255,7 +256,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
         category: holding.category,
         categoryColor: getCategoryColor(holding.category),
         shares: holding.shares,
-        gak: holding.gak,
+        gak: holding.gakDKK || holding.gak, // Use DKK GAK if available
         gakCurrency: holding.gakCurrency,
         purchaseDate: new Date().toISOString().split('T')[0],
         currentPrice: holding.currentPriceDKK || holding.currentPrice,
@@ -267,7 +268,8 @@ export default function FinanceView({ mode }: FinanceViewProps) {
         marketValueDKK: holding.marketValueDKK,
         profitLossDKK: holding.profitLossDKK,
         dailyChange: holding.dailyChangeDKK || holding.dailyChange,
-        dailyChangePercent: holding.dailyChangePercent
+        dailyChangePercent: holding.dailyChangePercent,
+        gakDKK: holding.gakDKK
       }))
       
       setStocks(formattedStocks)
@@ -830,7 +832,9 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-gray-900">{stock.name}</p>
-                    <p className="text-sm text-gray-600">{stock.symbol} • {stock.shares} aktier • GAK: {stock.gak.toLocaleString('da-DK')} {stock.currency}</p>
+                    <p className="text-sm text-gray-600">
+                      {stock.symbol} • {stock.shares} aktier • GAK: {stock.gakDKK ? stock.gakDKK.toLocaleString('da-DK') : stock.gak.toLocaleString('da-DK')} DKK
+                    </p>
                   </div>
                   <div className="flex items-center space-x-2">
                     <div className={`w-3 h-3 ${stock.categoryColor} rounded-sm`}></div>
