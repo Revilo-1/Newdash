@@ -20,32 +20,23 @@ import {
   Edit,
   Trash2,
   X,
-  Check
+  Check,
+  RefreshCw
 } from 'lucide-react'
 import { DashboardMode } from '@/types/dashboard'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useUserData } from '@/hooks/useUserData'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { StockHolding } from '@/lib/stockApi'
 
 interface FinanceViewProps {
   mode: DashboardMode
 }
 
-interface Stock {
-  id: string
-  name: string
-  symbol: string
+interface Stock extends StockHolding {
   logo: string
-  category: string
   categoryColor: string
-  shares: number
-  gak: number // Gennemsnitlig AnskaffelsesKurs
   purchaseDate: string // Still used internally for database
-  currentPrice: number
-  marketValue: number
-  profitLoss: number
-  profitLossPercent: number
-  currency: 'USD' | 'DKK' // Currency for this stock
 }
 
 interface SearchResult {
@@ -242,29 +233,70 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const { t } = useLanguage()
   const { stocks: dbStocks, saveStock, updateStock, deleteStock, loading, error } = useUserData()
   const [selectedTimeframe, setSelectedTimeframe] = useState('1Y')
-  const [stocks, setStocks] = useState<Stock[]>(initialStocks)
+  const [stocks, setStocks] = useState<Stock[]>([])
+  const [portfolioLoading, setPortfolioLoading] = useState(true)
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   
-  // Update stocks when database data changes
-  useEffect(() => {
-    if (dbStocks && dbStocks.length > 0) {
-      const formattedStocks = dbStocks.map(stock => ({
-        id: stock.id,
-        name: stock.name,
-        symbol: stock.symbol,
-        logo: stock.logo || '📈',
-        category: stock.category || 'Custom',
-        categoryColor: stock.categoryColor || 'bg-purple-500',
-        shares: stock.shares,
-        gak: stock.gak,
-        purchaseDate: stock.purchase_date,
-        currentPrice: stock.current_price,
-        marketValue: stock.market_value,
-        profitLoss: stock.profit_loss,
-        profitLossPercent: stock.profit_loss_percent
+  // Load portfolio with live prices
+  const loadPortfolio = async () => {
+    try {
+      setPortfolioLoading(true)
+      const response = await fetch('/api/stocks/portfolio')
+      if (!response.ok) throw new Error('Failed to fetch portfolio')
+      
+      const data = await response.json()
+      
+      // Transform API data to match our Stock interface
+      const formattedStocks: Stock[] = data.holdings.map((holding: any) => ({
+        id: holding.id,
+        name: holding.name,
+        symbol: holding.symbol,
+        logo: '📈',
+        category: holding.category,
+        categoryColor: getCategoryColor(holding.category),
+        shares: holding.shares,
+        gak: holding.gak,
+        gakCurrency: holding.gakCurrency,
+        purchaseDate: new Date().toISOString().split('T')[0],
+        currentPrice: holding.currentPriceDKK || holding.currentPrice,
+        marketValue: holding.marketValueDKK || holding.marketValue,
+        profitLoss: holding.profitLossDKK || holding.profitLoss,
+        profitLossPercent: holding.profitLossPercent,
+        currency: 'DKK' as const,
+        currentPriceDKK: holding.currentPriceDKK,
+        marketValueDKK: holding.marketValueDKK,
+        profitLossDKK: holding.profitLossDKK,
+        dailyChange: holding.dailyChangeDKK || holding.dailyChange,
+        dailyChangePercent: holding.dailyChangePercent
       }))
+      
       setStocks(formattedStocks)
+      setLastUpdated(new Date(data.lastUpdated))
+    } catch (err) {
+      console.error('Error loading portfolio:', err)
+      // Fallback to initial stocks if API fails
+      setStocks(initialStocks)
+    } finally {
+      setPortfolioLoading(false)
     }
-  }, [dbStocks])
+  }
+  
+  // Load portfolio on component mount
+  useEffect(() => {
+    loadPortfolio()
+  }, [])
+  
+  // Helper function to get category color
+  const getCategoryColor = (category: string): string => {
+    const colors: Record<string, string> = {
+      'Custom': 'bg-purple-500',
+      'Cloud Computing': 'bg-blue-500',
+      'Healthcare': 'bg-green-500',
+      'Real Estate': 'bg-orange-500',
+      'Technology': 'bg-indigo-500'
+    }
+    return colors[category] || 'bg-gray-500'
+  }
   const [showAddModal, setShowAddModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -756,8 +788,23 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           {/* Stock Holdings */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">Aktie Holdings</h2>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Aktie Holdings</h2>
+                {lastUpdated && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Live priser - Opdateret {lastUpdated.toLocaleTimeString('da-DK')}
+                  </p>
+                )}
+              </div>
               <div className="flex items-center space-x-2">
+                <button 
+                  onClick={loadPortfolio}
+                  disabled={portfolioLoading}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${portfolioLoading ? 'animate-spin' : ''}`} />
+                  Opdater
+                </button>
                 <button 
                   onClick={() => setShowAddModal(true)}
                   className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
@@ -790,10 +837,25 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                     <span className="text-sm text-gray-600">{stock.category}</span>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">{stock.marketValue.toLocaleString('da-DK')} {stock.currency}</p>
-                    <p className={`text-sm ${stock.profitLoss >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                      {stock.profitLoss >= 0 ? '+' : ''}{stock.profitLoss.toLocaleString('da-DK')} {stock.currency} ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
+                    <p className="font-semibold text-gray-900">
+                      {stock.marketValueDKK ? stock.marketValueDKK.toLocaleString('da-DK') : stock.marketValue.toLocaleString('da-DK')} DKK
                     </p>
+                    <p className={`text-sm ${stock.profitLossDKK ? (stock.profitLossDKK >= 0 ? 'text-green-600' : 'text-red-600') : (stock.profitLoss >= 0 ? 'text-green-600' : 'text-red-600')}`}>
+                      {stock.profitLossDKK ? (
+                        <>
+                          {stock.profitLossDKK >= 0 ? '+' : ''}{stock.profitLossDKK.toLocaleString('da-DK')} DKK ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
+                        </>
+                      ) : (
+                        <>
+                          {stock.profitLoss >= 0 ? '+' : ''}{stock.profitLoss.toLocaleString('da-DK')} {stock.currency} ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
+                        </>
+                      )}
+                    </p>
+                    {stock.dailyChange && (
+                      <p className={`text-xs ${stock.dailyChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange.toLocaleString('da-DK')} DKK ({stock.dailyChangePercent >= 0 ? '+' : ''}{stock.dailyChangePercent.toFixed(2)}%)
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-1">
                     <button 
