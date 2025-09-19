@@ -184,9 +184,159 @@ export default function FinanceView({ mode }: FinanceViewProps) {
 
       {/* Conditional Content */}
       {activeTab === 'stocks' ? (
-        <div className="text-center py-12">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Aktieportefølje</h2>
-          <p className="text-gray-600">Aktieportefølje funktionalitet kommer snart...</p>
+        <div className="space-y-6">
+          {/* Stock Portfolio Overview */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <TrendingUp className="h-8 w-8 text-green-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Portefølje Værdi</p>
+                  <p className="text-2xl font-semibold text-gray-900">
+                    {portfolioLoading ? '...' : stocks.reduce((sum, stock) => sum + (stock.marketValueDKK || stock.marketValue || 0), 0).toLocaleString('da-DK')} DKK
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <DollarSign className="h-8 w-8 text-blue-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Gevinst/Tab</p>
+                  <p className={`text-2xl font-semibold ${stocks.reduce((sum, stock) => sum + (stock.profitLossDKK || stock.profitLoss || 0), 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {portfolioLoading ? '...' : (stocks.reduce((sum, stock) => sum + (stock.profitLossDKK || stock.profitLoss || 0), 0) >= 0 ? '+' : '') + stocks.reduce((sum, stock) => sum + (stock.profitLossDKK || stock.profitLoss || 0), 0).toLocaleString('da-DK')} DKK
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <Calendar className="h-8 w-8 text-purple-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Antal Aktier</p>
+                  <p className="text-2xl font-semibold text-gray-900">{stocks.length}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <RefreshCw className="h-8 w-8 text-orange-600" />
+                </div>
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Sidst Opdateret</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {lastUpdated ? lastUpdated.toLocaleTimeString('da-DK') : 'Aldrig'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stock Holdings */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Aktie Holdings</h2>
+                {lastUpdated && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    Live priser - Opdateret {lastUpdated.toLocaleTimeString('da-DK')}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center space-x-2">
+                <button 
+                  onClick={loadPortfolio}
+                  disabled={portfolioLoading}
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-1 ${portfolioLoading ? 'animate-spin' : ''}`} />
+                  Opdater
+                </button>
+                <button className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                  <Plus className="h-4 w-4 mr-1" />
+                  Tilføj Aktie
+                </button>
+              </div>
+            </div>
+
+            {portfolioLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            ) : stocks.length === 0 ? (
+              <div className="text-center py-12">
+                <TrendingUp className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Ingen aktier fundet</h3>
+                <p className="text-gray-600">Tilføj dine første aktier for at komme i gang</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {stocks.map((stock) => (
+                  <div key={stock.id} className="border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <span className="text-lg">{stock.logo}</span>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{stock.name}</h4>
+                          <p className="text-sm text-gray-600">
+                            {stock.symbol} • {stock.shares} aktier • GAK: {stock.gakDKK ? stock.gakDKK.toLocaleString('da-DK') : stock.gak.toLocaleString('da-DK')} DKK
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-3 h-3 ${stock.categoryColor} rounded-sm`}></div>
+                        <span className="text-sm text-gray-600">{stock.category}</span>
+                      </div>
+                      
+                      <div className="text-right">
+                        <p className="font-semibold text-gray-900">
+                          {stock.marketValueDKK ? stock.marketValueDKK.toLocaleString('da-DK') : stock.marketValue.toLocaleString('da-DK')} DKK
+                        </p>
+                        <p className={`text-sm ${stock.profitLossDKK ? (stock.profitLossDKK >= 0 ? 'text-green-600' : 'text-red-600') : (stock.profitLoss >= 0 ? 'text-green-600' : 'text-red-600')}`}>
+                          {stock.profitLossDKK ? (
+                            <>
+                              {stock.profitLossDKK >= 0 ? '+' : ''}{stock.profitLossDKK.toLocaleString('da-DK')} DKK ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
+                            </>
+                          ) : (
+                            <>
+                              {stock.profitLoss >= 0 ? '+' : ''}{stock.profitLoss.toLocaleString('da-DK')} {stock.currency} ({stock.profitLossPercent >= 0 ? '+' : ''}{stock.profitLossPercent.toFixed(2)}%)
+                            </>
+                          )}
+                        </p>
+                        {stock.dailyChange && (
+                          <p className={`text-xs ${stock.dailyChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {stock.dailyChange >= 0 ? '+' : ''}{stock.dailyChange.toLocaleString('da-DK')} DKK ({stock.dailyChangePercent >= 0 ? '+' : ''}{stock.dailyChangePercent.toFixed(2)}%)
+                          </p>
+                        )}
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <button className="p-2 text-gray-400 hover:text-blue-600">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button className="p-2 text-gray-400 hover:text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <CarLoanView />
