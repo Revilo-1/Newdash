@@ -324,12 +324,44 @@ export class DatabaseService {
 
   // Sales Items
   static async saveSalesItem(userId: string, salesData: any) {
-    const { data, error } = await supabase
+    // First attempt: insert with all provided fields (new schema)
+    let { data, error } = await supabase
       .from('sales_items')
       .insert([{ user_id: userId, ...salesData }])
       .select()
       .single()
-    
+
+    // Fallbacks for older/minimal schemas
+    if (error) {
+      const message = typeof error.message === 'string' ? error.message : ''
+      // Map new fields -> legacy columns (title, price) and drop unknowns
+      const legacyRow: any = {
+        title: salesData.item_name ?? salesData.title ?? '',
+        price: salesData.sale_price ?? salesData.price ?? 0,
+      }
+      // Optional sold_for if present in table; try with it first
+      if (salesData.sold_for) legacyRow.sold_for = salesData.sold_for
+
+      // Try legacy insert
+      let retry = await supabase
+        .from('sales_items')
+        .insert([{ user_id: userId, ...legacyRow }])
+        .select()
+        .single()
+
+      // If legacy insert fails due to sold_for not existing, try without it
+      if (retry.error && typeof retry.error.message === 'string' && retry.error.message.includes('sold_for')) {
+        const { sold_for, ...withoutSoldFor } = legacyRow
+        retry = await supabase
+          .from('sales_items')
+          .insert([{ user_id: userId, ...withoutSoldFor }])
+          .select()
+          .single()
+      }
+      if (retry.error) throw retry.error
+      return retry.data
+    }
+
     if (error) throw error
     return data
   }
