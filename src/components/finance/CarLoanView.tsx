@@ -55,50 +55,99 @@ export default function CarLoanView() {
   const [loanAmount, setLoanAmount] = useState('')
   const [interestRate, setInterestRate] = useState('')
 
-  // Mock data for demonstration
+  // Load data and saved settings
   useEffect(() => {
-    const mockLoans: CarLoan[] = [
-      {
-        id: '1',
-        carName: 'Tesla Model Y Performance',
-        loanAmount: 450000,
-        remainingAmount: 280000,
-        monthlyPayment: 3200,
-        interestRate: 4.5,
-        startDate: '2023-01-01',
-        endDate: '2027-12-01',
-        totalMonths: 60,
-        paidMonths: 24,
-        remainingMonths: 36
+    // Load saved settings from localStorage
+    let savedSettings = null
+    try {
+      const saved = localStorage.getItem('carLoanSettings')
+      if (saved) {
+        savedSettings = JSON.parse(saved)
       }
+    } catch (error) {
+      console.error('Error loading saved settings:', error)
+    }
+
+    // Default loan data
+    const defaultLoan: CarLoan = {
+      id: '1',
+      carName: 'Tesla Model Y Performance',
+      loanAmount: 450000,
+      remainingAmount: 280000,
+      monthlyPayment: 3200,
+      interestRate: 4.5,
+      startDate: '2023-01-01',
+      endDate: '2027-12-01',
+      totalMonths: 60,
+      paidMonths: 24,
+      remainingMonths: 36
+    }
+
+    // Load saved monthly payment
+    let savedMonthlyPayment = null
+    try {
+      const saved = localStorage.getItem('carLoanMonthlyPayment')
+      if (saved) {
+        savedMonthlyPayment = JSON.parse(saved)
+      }
+    } catch (error) {
+      console.error('Error loading saved monthly payment:', error)
+    }
+
+    // Apply saved settings if available
+    const finalLoan = savedSettings ? {
+      ...defaultLoan,
+      loanAmount: savedSettings.loanAmount,
+      interestRate: savedSettings.interestRate,
+      monthlyPayment: savedMonthlyPayment ? savedMonthlyPayment.monthlyPayment : defaultLoan.monthlyPayment
+    } : {
+      ...defaultLoan,
+      monthlyPayment: savedMonthlyPayment ? savedMonthlyPayment.monthlyPayment : defaultLoan.monthlyPayment
+    }
+
+    const mockLoans: CarLoan[] = [finalLoan]
+
+    // Load saved payments from localStorage
+    let savedPayments: PaymentHistory[] = []
+    try {
+      const saved = localStorage.getItem('carLoanPayments')
+      if (saved) {
+        savedPayments = JSON.parse(saved)
+      }
+    } catch (error) {
+      console.error('Error loading saved payments:', error)
+    }
+
+    // Default payment history if no saved payments
+    const defaultHistory: PaymentHistory[] = [
+      { month: 'Jan 2023', amount: 3200, remaining: finalLoan.loanAmount, interest: 1687, principal: 1513 },
+      { month: 'Feb 2023', amount: 3200, remaining: finalLoan.loanAmount - 1513, interest: 1682, principal: 1518 },
+      { month: 'Mar 2023', amount: 3200, remaining: finalLoan.loanAmount - 3031, interest: 1676, principal: 1524 },
+      { month: 'Apr 2023', amount: 3200, remaining: finalLoan.loanAmount - 4555, interest: 1670, principal: 1530 },
+      { month: 'May 2023', amount: 3200, remaining: finalLoan.loanAmount - 6085, interest: 1665, principal: 1535 },
+      { month: 'Jun 2023', amount: 3200, remaining: finalLoan.loanAmount - 7620, interest: 1659, principal: 1541 },
+      { month: 'Jul 2023', amount: 3200, remaining: finalLoan.loanAmount - 9161, interest: 1653, principal: 1547 },
+      { month: 'Aug 2023', amount: 3200, remaining: finalLoan.loanAmount - 10708, interest: 1647, principal: 1553 },
+      { month: 'Sep 2023', amount: 3200, remaining: finalLoan.loanAmount - 12261, interest: 1642, principal: 1558 },
+      { month: 'Oct 2023', amount: 3200, remaining: finalLoan.loanAmount - 13819, interest: 1636, principal: 1564 },
+      { month: 'Nov 2023', amount: 3200, remaining: finalLoan.loanAmount - 15383, interest: 1630, principal: 1570 },
+      { month: 'Dec 2023', amount: 3200, remaining: finalLoan.loanAmount - 16953, interest: 1624, principal: 1576 },
+      { month: 'Jan 2024', amount: 3200, remaining: finalLoan.loanAmount - 18529, interest: 1618, principal: 1582 },
+      { month: 'Feb 2024', amount: 3200, remaining: finalLoan.loanAmount - 20111, interest: 1612, principal: 1588 },
+      { month: 'Mar 2024', amount: 3200, remaining: finalLoan.loanAmount - 21699, interest: 1606, principal: 1594 },
+      { month: 'Apr 2024', amount: 3200, remaining: finalLoan.loanAmount - 23293, interest: 1600, principal: 1600 },
+      { month: 'May 2024', amount: 3200, remaining: finalLoan.loanAmount - 24893, interest: 1594, principal: 1606 },
+      { month: 'Jun 2024', amount: 3200, remaining: finalLoan.loanAmount - 26499, interest: 1588, principal: 1612 },
+      { month: 'Jul 2024', amount: 3200, remaining: finalLoan.loanAmount - 28111, interest: 1582, principal: 1618 },
+      { month: 'Aug 2024', amount: 3200, remaining: finalLoan.loanAmount - 29729, interest: 1576, principal: 1624 },
+      { month: 'Sep 2024', amount: 3200, remaining: finalLoan.loanAmount - 31353, interest: 1570, principal: 1630 },
+      { month: 'Oct 2024', amount: 3200, remaining: finalLoan.loanAmount - 32983, interest: 1564, principal: 1636 },
+      { month: 'Nov 2024', amount: 3200, remaining: finalLoan.loanAmount - 34619, interest: 1558, principal: 1642 },
+      { month: 'Dec 2024', amount: 3200, remaining: finalLoan.loanAmount - 36261, interest: 1552, principal: 1648 }
     ]
 
-    const mockHistory: PaymentHistory[] = [
-      { month: 'Jan 2023', amount: 3200, remaining: 450000, interest: 1687, principal: 1513 },
-      { month: 'Feb 2023', amount: 3200, remaining: 448487, interest: 1682, principal: 1518 },
-      { month: 'Mar 2023', amount: 3200, remaining: 446969, interest: 1676, principal: 1524 },
-      { month: 'Apr 2023', amount: 3200, remaining: 445445, interest: 1670, principal: 1530 },
-      { month: 'May 2023', amount: 3200, remaining: 443915, interest: 1665, principal: 1535 },
-      { month: 'Jun 2023', amount: 3200, remaining: 442380, interest: 1659, principal: 1541 },
-      { month: 'Jul 2023', amount: 3200, remaining: 440839, interest: 1653, principal: 1547 },
-      { month: 'Aug 2023', amount: 3200, remaining: 439292, interest: 1647, principal: 1553 },
-      { month: 'Sep 2023', amount: 3200, remaining: 437739, interest: 1642, principal: 1558 },
-      { month: 'Oct 2023', amount: 3200, remaining: 436181, interest: 1636, principal: 1564 },
-      { month: 'Nov 2023', amount: 3200, remaining: 434617, interest: 1630, principal: 1570 },
-      { month: 'Dec 2023', amount: 3200, remaining: 433047, interest: 1624, principal: 1576 },
-      { month: 'Jan 2024', amount: 3200, remaining: 431471, interest: 1618, principal: 1582 },
-      { month: 'Feb 2024', amount: 3200, remaining: 429889, interest: 1612, principal: 1588 },
-      { month: 'Mar 2024', amount: 3200, remaining: 428301, interest: 1606, principal: 1594 },
-      { month: 'Apr 2024', amount: 3200, remaining: 426707, interest: 1600, principal: 1600 },
-      { month: 'May 2024', amount: 3200, remaining: 425107, interest: 1594, principal: 1606 },
-      { month: 'Jun 2024', amount: 3200, remaining: 423501, interest: 1588, principal: 1612 },
-      { month: 'Jul 2024', amount: 3200, remaining: 421889, interest: 1582, principal: 1618 },
-      { month: 'Aug 2024', amount: 3200, remaining: 420271, interest: 1576, principal: 1624 },
-      { month: 'Sep 2024', amount: 3200, remaining: 418647, interest: 1570, principal: 1630 },
-      { month: 'Oct 2024', amount: 3200, remaining: 417017, interest: 1564, principal: 1636 },
-      { month: 'Nov 2024', amount: 3200, remaining: 415381, interest: 1558, principal: 1642 },
-      { month: 'Dec 2024', amount: 3200, remaining: 413739, interest: 1552, principal: 1648 }
-    ]
+    // Use saved payments if available, otherwise use default
+    const mockHistory = savedPayments.length > 0 ? savedPayments : defaultHistory
 
     setCarLoans(mockLoans)
     setPaymentHistory(mockHistory)
@@ -152,6 +201,7 @@ export default function CarLoanView() {
       principal: amount * 0.6  // Mock principal calculation
     }
 
+    // Update state
     setPaymentHistory(prev => [newPayment, ...prev])
     
     // Update loan remaining amount
@@ -159,6 +209,15 @@ export default function CarLoanView() {
       ...loan,
       remainingAmount: loan.remainingAmount - amount
     })))
+
+    // Save payment to localStorage
+    try {
+      const savedPayments = JSON.parse(localStorage.getItem('carLoanPayments') || '[]')
+      savedPayments.unshift(newPayment)
+      localStorage.setItem('carLoanPayments', JSON.stringify(savedPayments))
+    } catch (error) {
+      console.error('Error saving payment:', error)
+    }
 
     // Reset form
     setPaymentAmount('')
@@ -170,11 +229,24 @@ export default function CarLoanView() {
   }
 
   const handleSetMonthlyPayment = (loanId: string, newAmount: number) => {
+    // Update state
     setCarLoans(prev => prev.map(loan => 
       loan.id === loanId 
         ? { ...loan, monthlyPayment: newAmount }
         : loan
     ))
+
+    // Save to localStorage
+    try {
+      const monthlyPaymentData = {
+        monthlyPayment: newAmount,
+        lastUpdated: new Date().toISOString()
+      }
+      localStorage.setItem('carLoanMonthlyPayment', JSON.stringify(monthlyPaymentData))
+    } catch (error) {
+      console.error('Error saving monthly payment:', error)
+    }
+
     alert('Månedlig betaling opdateret!')
   }
 
@@ -200,11 +272,24 @@ export default function CarLoanView() {
       return
     }
 
+    // Update state
     setCarLoans(prev => prev.map(loan => ({
       ...loan,
       loanAmount: newLoanAmount,
       interestRate: newInterestRate
     })))
+
+    // Save to localStorage for persistence
+    try {
+      const carLoanData = {
+        loanAmount: newLoanAmount,
+        interestRate: newInterestRate,
+        lastUpdated: new Date().toISOString()
+      }
+      localStorage.setItem('carLoanSettings', JSON.stringify(carLoanData))
+    } catch (error) {
+      console.error('Error saving to localStorage:', error)
+    }
 
     setShowSettingsModal(false)
     setLoanAmount('')
