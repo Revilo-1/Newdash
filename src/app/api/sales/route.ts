@@ -32,8 +32,13 @@ export async function POST(request: NextRequest) {
     const salesData = await request.json()
     
     // Validate required fields
-    if (!salesData.item_name || !salesData.sale_price || !salesData.sale_platform || !salesData.sale_date) {
+    if (!salesData.item_name || !salesData.sale_price || !salesData.sale_platform) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    // Default sale_date to today if not provided
+    if (!salesData.sale_date) {
+      salesData.sale_date = new Date().toISOString().slice(0, 10)
     }
 
     const salesItem = await DatabaseService.saveSalesItem(session.user.id, salesData)

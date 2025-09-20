@@ -93,7 +93,7 @@ export default function SalesView() {
   }
 
   const handleAddItem = async () => {
-    if (!itemName || !salePrice || !salePlatform || !saleDate) {
+    if (!itemName || !salePrice || !salePlatform) {
       alert('Udfyld venligst alle påkrævede felter')
       return
     }
@@ -103,7 +103,7 @@ export default function SalesView() {
         item_name: itemName,
         sale_price: parseFloat(salePrice),
         sale_platform: salePlatform,
-        sale_date: saleDate,
+        // sale_date optional; backend defaults to today
         description: description,
         category: category,
         condition: condition
@@ -130,7 +130,7 @@ export default function SalesView() {
   }
 
   const handleUpdateItem = async () => {
-    if (!editingItem || !itemName || !salePrice || !salePlatform || !saleDate) {
+    if (!editingItem || !itemName || !salePrice || !salePlatform) {
       alert('Udfyld venligst alle påkrævede felter')
       return
     }
@@ -140,7 +140,6 @@ export default function SalesView() {
         item_name: itemName,
         sale_price: parseFloat(salePrice),
         sale_platform: salePlatform,
-        sale_date: saleDate,
         description: description,
         category: category,
         condition: condition
@@ -479,18 +478,7 @@ export default function SalesView() {
                 </select>
               </div>
 
-              {/* Sale Date */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Salgsdato *
-                </label>
-                <input
-                  type="date"
-                  value={saleDate}
-                  onChange={(e) => setSaleDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              {/* Sale Date - removed per request; backend defaults to today */}
 
               {/* Category */}
               <div>
@@ -510,23 +498,7 @@ export default function SalesView() {
                 </select>
               </div>
 
-              {/* Condition */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Stand
-                </label>
-                <select
-                  value={condition}
-                  onChange={(e) => setCondition(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="New">Ny</option>
-                  <option value="Like New">Som ny</option>
-                  <option value="Good">God</option>
-                  <option value="Fair">Acceptabel</option>
-                  <option value="Poor">Dårlig</option>
-                </select>
-              </div>
+              {/* Condition - removed per request */}
 
               {/* Description */}
               <div>
