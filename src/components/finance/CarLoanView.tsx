@@ -43,18 +43,22 @@ export default function CarLoanView() {
   const [carLoans, setCarLoans] = useState<CarLoan[]>([])
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [editingLoan, setEditingLoan] = useState<CarLoan | null>(null)
   const [loading, setLoading] = useState(true)
+  const [paymentAmount, setPaymentAmount] = useState('')
+  const [paymentDate, setPaymentDate] = useState('')
+  const [isExtraPayment, setIsExtraPayment] = useState(false)
 
   // Mock data for demonstration
   useEffect(() => {
     const mockLoans: CarLoan[] = [
       {
         id: '1',
-        carName: 'BMW X5',
+        carName: 'Tesla Model Y Performance',
         loanAmount: 450000,
         remainingAmount: 280000,
-        monthlyPayment: 8500,
+        monthlyPayment: 3200,
         interestRate: 4.5,
         startDate: '2023-01-01',
         endDate: '2027-12-01',
@@ -65,30 +69,30 @@ export default function CarLoanView() {
     ]
 
     const mockHistory: PaymentHistory[] = [
-      { month: 'Jan 2023', amount: 8500, remaining: 450000, interest: 1687, principal: 6813 },
-      { month: 'Feb 2023', amount: 8500, remaining: 443187, interest: 1662, principal: 6838 },
-      { month: 'Mar 2023', amount: 8500, remaining: 436349, interest: 1636, principal: 6864 },
-      { month: 'Apr 2023', amount: 8500, remaining: 429485, interest: 1611, principal: 6889 },
-      { month: 'May 2023', amount: 8500, remaining: 422596, interest: 1585, principal: 6915 },
-      { month: 'Jun 2023', amount: 8500, remaining: 415681, interest: 1559, principal: 6941 },
-      { month: 'Jul 2023', amount: 8500, remaining: 408740, interest: 1533, principal: 6967 },
-      { month: 'Aug 2023', amount: 8500, remaining: 401773, interest: 1507, principal: 6993 },
-      { month: 'Sep 2023', amount: 8500, remaining: 394780, interest: 1480, principal: 7020 },
-      { month: 'Oct 2023', amount: 8500, remaining: 387760, interest: 1454, principal: 7046 },
-      { month: 'Nov 2023', amount: 8500, remaining: 380714, interest: 1428, principal: 7072 },
-      { month: 'Dec 2023', amount: 8500, remaining: 373642, interest: 1401, principal: 7099 },
-      { month: 'Jan 2024', amount: 8500, remaining: 366543, interest: 1375, principal: 7125 },
-      { month: 'Feb 2024', amount: 8500, remaining: 359418, interest: 1348, principal: 7152 },
-      { month: 'Mar 2024', amount: 8500, remaining: 352266, interest: 1321, principal: 7179 },
-      { month: 'Apr 2024', amount: 8500, remaining: 345087, interest: 1294, principal: 7206 },
-      { month: 'May 2024', amount: 8500, remaining: 337881, interest: 1267, principal: 7233 },
-      { month: 'Jun 2024', amount: 8500, remaining: 330648, interest: 1240, principal: 7260 },
-      { month: 'Jul 2024', amount: 8500, remaining: 323388, interest: 1213, principal: 7287 },
-      { month: 'Aug 2024', amount: 8500, remaining: 316101, interest: 1185, principal: 7315 },
-      { month: 'Sep 2024', amount: 8500, remaining: 308786, interest: 1158, principal: 7342 },
-      { month: 'Oct 2024', amount: 8500, remaining: 301444, interest: 1130, principal: 7370 },
-      { month: 'Nov 2024', amount: 8500, remaining: 294074, interest: 1103, principal: 7397 },
-      { month: 'Dec 2024', amount: 8500, remaining: 286677, interest: 1075, principal: 7425 }
+      { month: 'Jan 2023', amount: 3200, remaining: 450000, interest: 1687, principal: 1513 },
+      { month: 'Feb 2023', amount: 3200, remaining: 448487, interest: 1682, principal: 1518 },
+      { month: 'Mar 2023', amount: 3200, remaining: 446969, interest: 1676, principal: 1524 },
+      { month: 'Apr 2023', amount: 3200, remaining: 445445, interest: 1670, principal: 1530 },
+      { month: 'May 2023', amount: 3200, remaining: 443915, interest: 1665, principal: 1535 },
+      { month: 'Jun 2023', amount: 3200, remaining: 442380, interest: 1659, principal: 1541 },
+      { month: 'Jul 2023', amount: 3200, remaining: 440839, interest: 1653, principal: 1547 },
+      { month: 'Aug 2023', amount: 3200, remaining: 439292, interest: 1647, principal: 1553 },
+      { month: 'Sep 2023', amount: 3200, remaining: 437739, interest: 1642, principal: 1558 },
+      { month: 'Oct 2023', amount: 3200, remaining: 436181, interest: 1636, principal: 1564 },
+      { month: 'Nov 2023', amount: 3200, remaining: 434617, interest: 1630, principal: 1570 },
+      { month: 'Dec 2023', amount: 3200, remaining: 433047, interest: 1624, principal: 1576 },
+      { month: 'Jan 2024', amount: 3200, remaining: 431471, interest: 1618, principal: 1582 },
+      { month: 'Feb 2024', amount: 3200, remaining: 429889, interest: 1612, principal: 1588 },
+      { month: 'Mar 2024', amount: 3200, remaining: 428301, interest: 1606, principal: 1594 },
+      { month: 'Apr 2024', amount: 3200, remaining: 426707, interest: 1600, principal: 1600 },
+      { month: 'May 2024', amount: 3200, remaining: 425107, interest: 1594, principal: 1606 },
+      { month: 'Jun 2024', amount: 3200, remaining: 423501, interest: 1588, principal: 1612 },
+      { month: 'Jul 2024', amount: 3200, remaining: 421889, interest: 1582, principal: 1618 },
+      { month: 'Aug 2024', amount: 3200, remaining: 420271, interest: 1576, principal: 1624 },
+      { month: 'Sep 2024', amount: 3200, remaining: 418647, interest: 1570, principal: 1630 },
+      { month: 'Oct 2024', amount: 3200, remaining: 417017, interest: 1564, principal: 1636 },
+      { month: 'Nov 2024', amount: 3200, remaining: 415381, interest: 1558, principal: 1642 },
+      { month: 'Dec 2024', amount: 3200, remaining: 413739, interest: 1552, principal: 1648 }
     ]
 
     setCarLoans(mockLoans)
@@ -125,6 +129,50 @@ export default function CarLoanView() {
     setCarLoans(prev => prev.filter(loan => loan.id !== id))
   }
 
+  const handleAddPayment = () => {
+    if (!paymentAmount || !paymentDate) {
+      alert('Udfyld venligst alle felter')
+      return
+    }
+
+    const amount = parseFloat(paymentAmount)
+    const date = new Date(paymentDate)
+    
+    // Add payment to history
+    const newPayment: PaymentHistory = {
+      month: date.toLocaleDateString('da-DK', { month: 'short', year: 'numeric' }),
+      amount: amount,
+      remaining: carLoans[0].remainingAmount - amount,
+      interest: amount * 0.4, // Mock interest calculation
+      principal: amount * 0.6  // Mock principal calculation
+    }
+
+    setPaymentHistory(prev => [newPayment, ...prev])
+    
+    // Update loan remaining amount
+    setCarLoans(prev => prev.map(loan => ({
+      ...loan,
+      remainingAmount: loan.remainingAmount - amount
+    })))
+
+    // Reset form
+    setPaymentAmount('')
+    setPaymentDate('')
+    setIsExtraPayment(false)
+    setShowPaymentModal(false)
+    
+    alert('Indbetaling registreret!')
+  }
+
+  const handleSetMonthlyPayment = (loanId: string, newAmount: number) => {
+    setCarLoans(prev => prev.map(loan => 
+      loan.id === loanId 
+        ? { ...loan, monthlyPayment: newAmount }
+        : loan
+    ))
+    alert('Månedlig betaling opdateret!')
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -142,11 +190,11 @@ export default function CarLoanView() {
           <p className="text-gray-600">Administrer dine billån og se betalingsstatus</p>
         </div>
         <button
-          onClick={handleAddLoan}
+          onClick={() => setShowPaymentModal(true)}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Tilføj Billån
+          Tilføj Indbetaling
         </button>
       </div>
 
@@ -280,7 +328,20 @@ export default function CarLoanView() {
                 
                 <div className="text-right">
                   <p className="text-sm font-medium text-gray-600">Månedlig Betaling</p>
-                  <p className="text-lg font-semibold text-gray-900">{loan.monthlyPayment.toLocaleString('da-DK')} DKK</p>
+                  <div className="flex items-center space-x-2">
+                    <p className="text-lg font-semibold text-gray-900">{loan.monthlyPayment.toLocaleString('da-DK')} DKK</p>
+                    <button
+                      onClick={() => {
+                        const newAmount = prompt('Indtast ny månedlig betaling:', loan.monthlyPayment.toString())
+                        if (newAmount && !isNaN(parseFloat(newAmount))) {
+                          handleSetMonthlyPayment(loan.id, parseFloat(newAmount))
+                        }
+                      }}
+                      className="p-1 text-gray-400 hover:text-blue-600"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="text-right">
@@ -376,6 +437,107 @@ export default function CarLoanView() {
           </table>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">Tilføj Indbetaling</h3>
+              <button 
+                onClick={() => {
+                  setShowPaymentModal(false)
+                  setPaymentAmount('')
+                  setPaymentDate('')
+                  setIsExtraPayment(false)
+                }}
+                className="p-1 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Payment Amount */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Beløb (DKK)
+                </label>
+                <input
+                  type="number"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  placeholder="F.eks. 5000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Payment Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Dato
+                </label>
+                <input
+                  type="date"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Payment Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Betalingstype
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="paymentType"
+                      checked={!isExtraPayment}
+                      onChange={() => setIsExtraPayment(false)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-gray-700">Månedlig betaling ({carLoans[0]?.monthlyPayment.toLocaleString('da-DK')} DKK)</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="radio"
+                      name="paymentType"
+                      checked={isExtraPayment}
+                      onChange={() => setIsExtraPayment(true)}
+                      className="mr-2"
+                    />
+                    <span className="text-sm text-gray-700">Ekstra indbetaling</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowPaymentModal(false)
+                    setPaymentAmount('')
+                    setPaymentDate('')
+                    setIsExtraPayment(false)
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Annuller
+                </button>
+                <button
+                  onClick={handleAddPayment}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Registrer Indbetaling
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
