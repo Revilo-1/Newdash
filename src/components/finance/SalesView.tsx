@@ -25,6 +25,7 @@ interface SalesItem {
   description?: string
   category: string
   condition: string
+  soldFor?: 'self' | 'gitte'
 }
 
 interface SalesStats {
@@ -54,6 +55,7 @@ export default function SalesView() {
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('Other')
   const [condition, setCondition] = useState('Good')
+  const [soldFor, setSoldFor] = useState<'self' | 'gitte'>('self')
 
   // Load sales data from database
   useEffect(() => {
@@ -77,7 +79,8 @@ export default function SalesView() {
           saleDate: item.sale_date,
           description: item.description,
           category: item.category,
-          condition: item.condition
+          condition: item.condition,
+          soldFor: item.sold_for || 'self'
         }))
         
         setSalesItems(transformedItems)
@@ -106,7 +109,8 @@ export default function SalesView() {
         // sale_date optional; backend defaults to today
         description: description,
         category: category,
-        condition: condition
+        condition: condition,
+        sold_for: soldFor
       }
 
       const response = await fetch('/api/sales', {
@@ -142,7 +146,8 @@ export default function SalesView() {
         sale_platform: salePlatform,
         description: description,
         category: category,
-        condition: condition
+        condition: condition,
+        sold_for: soldFor
       }
 
       const response = await fetch(`/api/sales/${editingItem.id}`, {
@@ -195,6 +200,7 @@ export default function SalesView() {
     setDescription(item.description || '')
     setCategory(item.category)
     setCondition(item.condition)
+    setSoldFor(item.soldFor || 'self')
     setShowAddModal(true)
   }
 
@@ -206,6 +212,7 @@ export default function SalesView() {
     setDescription('')
     setCategory('Other')
     setCondition('Good')
+    setSoldFor('self')
     setEditingItem(null)
   }
 
@@ -375,7 +382,7 @@ export default function SalesView() {
                     <div>
                       <h4 className="font-semibold text-gray-900">{item.itemName}</h4>
                       <p className="text-sm text-gray-600">
-                        {item.salePlatform} • {new Date(item.saleDate).toLocaleDateString('da-DK')} • {item.category}
+                        {item.salePlatform} • {new Date(item.saleDate).toLocaleDateString('da-DK')} • {item.category} • {item.soldFor === 'gitte' ? 'For Gitte' : 'Egne ting'}
                       </p>
                       {item.description && (
                         <p className="text-sm text-gray-500 mt-1">{item.description}</p>
@@ -499,6 +506,21 @@ export default function SalesView() {
               </div>
 
               {/* Condition - removed per request */}
+
+              {/* Sold For */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Salgstype
+                </label>
+                <select
+                  value={soldFor}
+                  onChange={(e) => setSoldFor(e.target.value as 'self' | 'gitte')}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="self">Egne ting</option>
+                  <option value="gitte">For Gitte</option>
+                </select>
+              </div>
 
               {/* Description */}
               <div>

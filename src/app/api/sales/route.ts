@@ -41,6 +41,10 @@ export async function POST(request: NextRequest) {
       salesData.sale_date = new Date().toISOString().slice(0, 10)
     }
 
+    // Normalize sold_for values
+    if (salesData.sold_for && !['self', 'gitte'].includes(salesData.sold_for)) {
+      salesData.sold_for = 'self'
+    }
     const salesItem = await DatabaseService.saveSalesItem(session.user.id, salesData)
     return NextResponse.json({ salesItem }, { status: 201 })
   } catch (error: any) {

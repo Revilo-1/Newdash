@@ -371,7 +371,7 @@ export class DatabaseService {
   static async getSalesStats(userId: string) {
     const { data, error } = await supabase
       .from('sales_items')
-      .select('sale_price, sale_date, sale_platform')
+      .select('sale_price, sale_date, sale_platform, sold_for')
       .eq('user_id', userId)
     
     if (error) throw error

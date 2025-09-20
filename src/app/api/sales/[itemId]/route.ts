@@ -15,6 +15,9 @@ export async function PUT(
     }
 
     const updates = await request.json()
+    if (updates.sold_for && !['self', 'gitte'].includes(updates.sold_for)) {
+      updates.sold_for = 'self'
+    }
     const salesItem = await DatabaseService.updateSalesItem(session.user.id, params.itemId, updates)
     
     return NextResponse.json({ salesItem })
