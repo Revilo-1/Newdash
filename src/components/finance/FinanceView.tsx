@@ -27,6 +27,7 @@ import { DashboardMode } from '@/types/dashboard'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { useUserData } from '@/hooks/useUserData'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useSearchParams } from 'next/navigation'
 import { StockHolding } from '@/lib/stockApi'
 import CarLoanView from './CarLoanView'
 import SalesView from './SalesView'
@@ -58,8 +59,11 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const [stocks, setStocks] = useState<Stock[]>([])
   const [portfolioLoading, setPortfolioLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
-  const [activeTab, setActiveTab] = useState<'stocks' | 'car-loans' | 'sales'>('stocks')
+  const [activeTab, setActiveTab] = useState<'stocks' | 'car-loans'>('stocks')
   const [salesStats, setSalesStats] = useState({ totalSales: 0, totalItems: 0 })
+  const searchParams = useSearchParams()
+  const queryTab = searchParams?.get('tab')
+  const showSalesOnly = queryTab === 'sales'
   
   // Load portfolio with live prices
   const loadPortfolio = async () => {
@@ -163,44 +167,38 @@ export default function FinanceView({ mode }: FinanceViewProps) {
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab('stocks')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'stocks'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Aktieportefølje
-          </button>
-          <button
-            onClick={() => setActiveTab('car-loans')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'car-loans'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Billån
-          </button>
-          <button
-            onClick={() => setActiveTab('sales')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'sales'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Salg af Ting
-          </button>
-        </nav>
-      </div>
+      {/* Tab Navigation (hidden when viewing sales-only) */}
+      {!showSalesOnly && (
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8">
+            <button
+              onClick={() => setActiveTab('stocks')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'stocks'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Aktieportefølje
+            </button>
+            <button
+              onClick={() => setActiveTab('car-loans')}
+              className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'car-loans'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Billån
+            </button>
+          </nav>
+        </div>
+      )}
 
       {/* Conditional Content */}
-      {activeTab === 'stocks' ? (
+      {showSalesOnly ? (
+        <SalesView />
+      ) : activeTab === 'stocks' ? (
         <div className="space-y-6">
           {/* Stock Portfolio Overview */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
