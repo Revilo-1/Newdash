@@ -13,7 +13,8 @@ import {
   CreditCard,
   Clock,
   Target,
-  Settings
+  Settings,
+  X
 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts'
 
