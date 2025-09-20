@@ -55,9 +55,162 @@ export default function CarLoanView() {
   const [loanAmount, setLoanAmount] = useState('')
   const [interestRate, setInterestRate] = useState('')
 
-  // Load data and saved settings
+  // Load data from database
   useEffect(() => {
-    // Load saved settings from localStorage
+    loadCarLoans()
+  }, [])
+
+  const loadCarLoans = async () => {
+    try {
+      setLoading(true)
+      
+      // Try to load from database first
+      const response = await fetch('/api/car-loans')
+      if (response.ok) {
+        const data = await response.json()
+        
+        if (data.carLoans && data.carLoans.length > 0) {
+          // Transform database data to match our interface
+          const transformedLoans: CarLoan[] = data.carLoans.map((loan: any) => ({
+            id: loan.id,
+            carName: loan.car_name,
+            loanAmount: parseFloat(loan.loan_amount),
+            remainingAmount: parseFloat(loan.remaining_amount),
+            monthlyPayment: parseFloat(loan.monthly_payment),
+            interestRate: parseFloat(loan.interest_rate),
+            startDate: loan.start_date,
+            endDate: loan.end_date,
+            totalMonths: loan.total_months,
+            paidMonths: loan.paid_months,
+            remainingMonths: loan.remaining_months
+          }))
+          
+          setCarLoans(transformedLoans)
+          
+          // Load payments for the first loan
+          if (transformedLoans.length > 0) {
+            await loadPayments(transformedLoans[0].id)
+          }
+        } else {
+          // No loans in database, create default loan
+          await createDefaultLoan()
+        }
+      } else {
+        // Database error, fallback to localStorage
+        await loadFromLocalStorage()
+      }
+    } catch (error) {
+      console.error('Error loading car loans:', error)
+      // Fallback to localStorage
+      await loadFromLocalStorage()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createDefaultLoan = async () => {
+    const defaultLoanData = {
+      car_name: 'Tesla Model Y Performance',
+      loan_amount: 450000,
+      remaining_amount: 280000,
+      monthly_payment: 3200,
+      interest_rate: 4.5,
+      start_date: '2023-01-01',
+      end_date: '2027-12-01',
+      total_months: 60,
+      paid_months: 24,
+      remaining_months: 36
+    }
+
+    try {
+      const response = await fetch('/api/car-loans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(defaultLoanData)
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        const newLoan: CarLoan = {
+          id: data.carLoan.id,
+          carName: data.carLoan.car_name,
+          loanAmount: parseFloat(data.carLoan.loan_amount),
+          remainingAmount: parseFloat(data.carLoan.remaining_amount),
+          monthlyPayment: parseFloat(data.carLoan.monthly_payment),
+          interestRate: parseFloat(data.carLoan.interest_rate),
+          startDate: data.carLoan.start_date,
+          endDate: data.carLoan.end_date,
+          totalMonths: data.carLoan.total_months,
+          paidMonths: data.carLoan.paid_months,
+          remainingMonths: data.carLoan.remaining_months
+        }
+        
+        setCarLoans([newLoan])
+        await createDefaultPayments(newLoan.id)
+      } else {
+        // Fallback to localStorage
+        await loadFromLocalStorage()
+      }
+    } catch (error) {
+      console.error('Error creating default loan:', error)
+      await loadFromLocalStorage()
+    }
+  }
+
+  const createDefaultPayments = async (loanId: string) => {
+    const defaultPayments = [
+      { payment_date: '2024-01-01', amount: 3200, interest_amount: 1687, principal_amount: 1513, remaining_balance: 448487, payment_type: 'monthly' },
+      { payment_date: '2024-02-01', amount: 3200, interest_amount: 1682, principal_amount: 1518, remaining_balance: 446969, payment_type: 'monthly' },
+      { payment_date: '2024-03-01', amount: 3200, interest_amount: 1676, principal_amount: 1524, remaining_balance: 445445, payment_type: 'monthly' },
+      { payment_date: '2024-04-01', amount: 3200, interest_amount: 1670, principal_amount: 1530, remaining_balance: 443915, payment_type: 'monthly' },
+      { payment_date: '2024-05-01', amount: 3200, interest_amount: 1665, principal_amount: 1535, remaining_balance: 442380, payment_type: 'monthly' },
+      { payment_date: '2024-06-01', amount: 3200, interest_amount: 1659, principal_amount: 1541, remaining_balance: 440839, payment_type: 'monthly' },
+      { payment_date: '2024-07-01', amount: 3200, interest_amount: 1653, principal_amount: 1547, remaining_balance: 439292, payment_type: 'monthly' },
+      { payment_date: '2024-08-01', amount: 3200, interest_amount: 1647, principal_amount: 1553, remaining_balance: 437739, payment_type: 'monthly' },
+      { payment_date: '2024-09-01', amount: 3200, interest_amount: 1642, principal_amount: 1558, remaining_balance: 436181, payment_type: 'monthly' },
+      { payment_date: '2024-10-01', amount: 3200, interest_amount: 1636, principal_amount: 1564, remaining_balance: 434617, payment_type: 'monthly' },
+      { payment_date: '2024-11-01', amount: 3200, interest_amount: 1630, principal_amount: 1570, remaining_balance: 433047, payment_type: 'monthly' },
+      { payment_date: '2024-12-01', amount: 3200, interest_amount: 1624, principal_amount: 1576, remaining_balance: 431471, payment_type: 'monthly' }
+    ]
+
+    for (const payment of defaultPayments) {
+      try {
+        await fetch(`/api/car-loans/${loanId}/payments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payment)
+        })
+      } catch (error) {
+        console.error('Error creating default payment:', error)
+      }
+    }
+    
+    await loadPayments(loanId)
+  }
+
+  const loadPayments = async (loanId: string) => {
+    try {
+      const response = await fetch(`/api/car-loans/${loanId}/payments`)
+      if (response.ok) {
+        const data = await response.json()
+        
+        const transformedPayments: PaymentHistory[] = data.payments.map((payment: any) => ({
+          month: new Date(payment.payment_date).toLocaleDateString('da-DK', { month: 'short', year: 'numeric' }),
+          amount: parseFloat(payment.amount),
+          remaining: parseFloat(payment.remaining_balance),
+          interest: parseFloat(payment.interest_amount),
+          principal: parseFloat(payment.principal_amount)
+        }))
+        
+        setPaymentHistory(transformedPayments)
+      }
+    } catch (error) {
+      console.error('Error loading payments:', error)
+    }
+  }
+
+  const loadFromLocalStorage = async () => {
+    // Fallback to localStorage if database is not available
     let savedSettings = null
     try {
       const saved = localStorage.getItem('carLoanSettings')
@@ -68,7 +221,6 @@ export default function CarLoanView() {
       console.error('Error loading saved settings:', error)
     }
 
-    // Default loan data
     const defaultLoan: CarLoan = {
       id: '1',
       carName: 'Tesla Model Y Performance',
@@ -83,7 +235,6 @@ export default function CarLoanView() {
       remainingMonths: 36
     }
 
-    // Load saved monthly payment
     let savedMonthlyPayment = null
     try {
       const saved = localStorage.getItem('carLoanMonthlyPayment')
@@ -94,7 +245,6 @@ export default function CarLoanView() {
       console.error('Error loading saved monthly payment:', error)
     }
 
-    // Apply saved settings if available
     const finalLoan = savedSettings ? {
       ...defaultLoan,
       loanAmount: savedSettings.loanAmount,
@@ -105,9 +255,8 @@ export default function CarLoanView() {
       monthlyPayment: savedMonthlyPayment ? savedMonthlyPayment.monthlyPayment : defaultLoan.monthlyPayment
     }
 
-    const mockLoans: CarLoan[] = [finalLoan]
+    setCarLoans([finalLoan])
 
-    // Load saved payments from localStorage
     let savedPayments: PaymentHistory[] = []
     try {
       const saved = localStorage.getItem('carLoanPayments')
@@ -118,7 +267,6 @@ export default function CarLoanView() {
       console.error('Error loading saved payments:', error)
     }
 
-    // Default payment history if no saved payments
     const defaultHistory: PaymentHistory[] = [
       { month: 'Jan 2023', amount: 3200, remaining: finalLoan.loanAmount, interest: 1687, principal: 1513 },
       { month: 'Feb 2023', amount: 3200, remaining: finalLoan.loanAmount - 1513, interest: 1682, principal: 1518 },
@@ -146,13 +294,9 @@ export default function CarLoanView() {
       { month: 'Dec 2024', amount: 3200, remaining: finalLoan.loanAmount - 36261, interest: 1552, principal: 1648 }
     ]
 
-    // Use saved payments if available, otherwise use default
     const mockHistory = savedPayments.length > 0 ? savedPayments : defaultHistory
-
-    setCarLoans(mockLoans)
     setPaymentHistory(mockHistory)
-    setLoading(false)
-  }, [])
+  }
 
   // Calculate totals
   const totalLoanAmount = carLoans.reduce((sum, loan) => sum + loan.loanAmount, 0)
@@ -183,7 +327,7 @@ export default function CarLoanView() {
     setCarLoans(prev => prev.filter(loan => loan.id !== id))
   }
 
-  const handleAddPayment = () => {
+  const handleAddPayment = async () => {
     if (!paymentAmount || !paymentDate) {
       alert('Udfyld venligst alle felter')
       return
@@ -192,31 +336,75 @@ export default function CarLoanView() {
     const amount = parseFloat(paymentAmount)
     const date = new Date(paymentDate)
     
-    // Add payment to history
-    const newPayment: PaymentHistory = {
-      month: date.toLocaleDateString('da-DK', { month: 'short', year: 'numeric' }),
-      amount: amount,
-      remaining: carLoans[0].remainingAmount - amount,
-      interest: amount * 0.4, // Mock interest calculation
-      principal: amount * 0.6  // Mock principal calculation
-    }
-
-    // Update state
-    setPaymentHistory(prev => [newPayment, ...prev])
-    
-    // Update loan remaining amount
-    setCarLoans(prev => prev.map(loan => ({
-      ...loan,
-      remainingAmount: loan.remainingAmount - amount
-    })))
-
-    // Save payment to localStorage
     try {
-      const savedPayments = JSON.parse(localStorage.getItem('carLoanPayments') || '[]')
-      savedPayments.unshift(newPayment)
-      localStorage.setItem('carLoanPayments', JSON.stringify(savedPayments))
+      // Save to database
+      if (carLoans.length > 0) {
+        const paymentData = {
+          payment_date: paymentDate,
+          amount: amount,
+          interest_amount: amount * 0.4, // Mock interest calculation
+          principal_amount: amount * 0.6, // Mock principal calculation
+          remaining_balance: carLoans[0].remainingAmount - amount,
+          payment_type: isExtraPayment ? 'extra' : 'monthly'
+        }
+
+        const response = await fetch(`/api/car-loans/${carLoans[0].id}/payments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paymentData)
+        })
+
+        if (response.ok) {
+          // Update loan remaining amount in database
+          await fetch(`/api/car-loans/${carLoans[0].id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              remaining_amount: carLoans[0].remainingAmount - amount
+            })
+          })
+
+          // Reload data from database
+          await loadCarLoans()
+          
+          alert('Indbetaling registreret i database!')
+        } else {
+          throw new Error('Failed to save payment to database')
+        }
+      }
     } catch (error) {
-      console.error('Error saving payment:', error)
+      console.error('Error saving payment to database:', error)
+      
+      // Fallback to localStorage
+      const newPayment: PaymentHistory = {
+        month: date.toLocaleDateString('da-DK', { month: 'short', year: 'numeric' }),
+        amount: amount,
+        remaining: carLoans[0].remainingAmount - amount,
+        interest: amount * 0.4,
+        principal: amount * 0.6
+      }
+
+      // Update state
+      setPaymentHistory(prev => [newPayment, ...prev])
+      
+      // Update loan remaining amount
+      setCarLoans(prev => prev.map(loan => ({
+        ...loan,
+        remainingAmount: loan.remainingAmount - amount
+      })))
+
+      // Save payment to localStorage
+      try {
+        const savedPayments = JSON.parse(localStorage.getItem('carLoanPayments') || '[]')
+        savedPayments.unshift(newPayment)
+        localStorage.setItem('carLoanPayments', JSON.stringify(savedPayments))
+        
+        alert('Indbetaling registreret lokalt (database ikke tilgængelig)')
+      } catch (localError) {
+        console.error('Error saving payment to localStorage:', localError)
+        alert('Fejl ved registrering af indbetaling')
+        return
+      }
     }
 
     // Reset form
@@ -224,30 +412,55 @@ export default function CarLoanView() {
     setPaymentDate('')
     setIsExtraPayment(false)
     setShowPaymentModal(false)
-    
-    alert('Indbetaling registreret!')
   }
 
-  const handleSetMonthlyPayment = (loanId: string, newAmount: number) => {
-    // Update state
-    setCarLoans(prev => prev.map(loan => 
-      loan.id === loanId 
-        ? { ...loan, monthlyPayment: newAmount }
-        : loan
-    ))
-
-    // Save to localStorage
+  const handleSetMonthlyPayment = async (loanId: string, newAmount: number) => {
     try {
-      const monthlyPaymentData = {
-        monthlyPayment: newAmount,
-        lastUpdated: new Date().toISOString()
-      }
-      localStorage.setItem('carLoanMonthlyPayment', JSON.stringify(monthlyPaymentData))
-    } catch (error) {
-      console.error('Error saving monthly payment:', error)
-    }
+      // Update in database
+      const response = await fetch(`/api/car-loans/${loanId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          monthly_payment: newAmount
+        })
+      })
 
-    alert('Månedlig betaling opdateret!')
+      if (response.ok) {
+        // Update state
+        setCarLoans(prev => prev.map(loan => 
+          loan.id === loanId 
+            ? { ...loan, monthlyPayment: newAmount }
+            : loan
+        ))
+        
+        alert('Månedlig betaling opdateret i database!')
+      } else {
+        throw new Error('Failed to update in database')
+      }
+    } catch (error) {
+      console.error('Error saving monthly payment to database:', error)
+      
+      // Fallback to localStorage
+      try {
+        // Update state
+        setCarLoans(prev => prev.map(loan => 
+          loan.id === loanId 
+            ? { ...loan, monthlyPayment: newAmount }
+            : loan
+        ))
+
+        const monthlyPaymentData = {
+          monthlyPayment: newAmount,
+          lastUpdated: new Date().toISOString()
+        }
+        localStorage.setItem('carLoanMonthlyPayment', JSON.stringify(monthlyPaymentData))
+        
+        alert('Månedlig betaling opdateret lokalt (database ikke tilgængelig)')
+      } catch (localError) {
+        console.error('Error saving monthly payment to localStorage:', localError)
+        alert('Fejl ved opdatering af månedlig betaling')
+      }
+    }
   }
 
   const handleOpenSettings = () => {
@@ -258,7 +471,7 @@ export default function CarLoanView() {
     setShowSettingsModal(true)
   }
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
     if (!loanAmount || !interestRate) {
       alert('Udfyld venligst alle felter')
       return
@@ -272,29 +485,61 @@ export default function CarLoanView() {
       return
     }
 
-    // Update state
-    setCarLoans(prev => prev.map(loan => ({
-      ...loan,
-      loanAmount: newLoanAmount,
-      interestRate: newInterestRate
-    })))
-
-    // Save to localStorage for persistence
     try {
-      const carLoanData = {
-        loanAmount: newLoanAmount,
-        interestRate: newInterestRate,
-        lastUpdated: new Date().toISOString()
+      // Update in database
+      if (carLoans.length > 0) {
+        const response = await fetch(`/api/car-loans/${carLoans[0].id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            loan_amount: newLoanAmount,
+            interest_rate: newInterestRate
+          })
+        })
+
+        if (response.ok) {
+          // Update state
+          setCarLoans(prev => prev.map(loan => ({
+            ...loan,
+            loanAmount: newLoanAmount,
+            interestRate: newInterestRate
+          })))
+          
+          alert('Indstillinger gemt i database!')
+        } else {
+          throw new Error('Failed to update in database')
+        }
       }
-      localStorage.setItem('carLoanSettings', JSON.stringify(carLoanData))
     } catch (error) {
-      console.error('Error saving to localStorage:', error)
+      console.error('Error saving to database:', error)
+      
+      // Fallback to localStorage
+      try {
+        const carLoanData = {
+          loanAmount: newLoanAmount,
+          interestRate: newInterestRate,
+          lastUpdated: new Date().toISOString()
+        }
+        localStorage.setItem('carLoanSettings', JSON.stringify(carLoanData))
+        
+        // Update state
+        setCarLoans(prev => prev.map(loan => ({
+          ...loan,
+          loanAmount: newLoanAmount,
+          interestRate: newInterestRate
+        })))
+        
+        alert('Indstillinger gemt lokalt (database ikke tilgængelig)')
+      } catch (localError) {
+        console.error('Error saving to localStorage:', localError)
+        alert('Fejl ved gemning af indstillinger')
+        return
+      }
     }
 
     setShowSettingsModal(false)
     setLoanAmount('')
     setInterestRate('')
-    alert('Indstillinger gemt!')
   }
 
   if (loading) {

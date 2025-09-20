@@ -29,6 +29,7 @@ import { useUserData } from '@/hooks/useUserData'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { StockHolding } from '@/lib/stockApi'
 import CarLoanView from './CarLoanView'
+import SalesView from './SalesView'
 
 interface FinanceViewProps {
   mode: DashboardMode
@@ -57,7 +58,8 @@ export default function FinanceView({ mode }: FinanceViewProps) {
   const [stocks, setStocks] = useState<Stock[]>([])
   const [portfolioLoading, setPortfolioLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
-  const [activeTab, setActiveTab] = useState<'stocks' | 'car-loans'>('stocks')
+  const [activeTab, setActiveTab] = useState<'stocks' | 'car-loans' | 'sales'>('stocks')
+  const [salesStats, setSalesStats] = useState({ totalSales: 0, totalItems: 0 })
   
   // Load portfolio with live prices
   const loadPortfolio = async () => {
@@ -104,9 +106,23 @@ export default function FinanceView({ mode }: FinanceViewProps) {
     }
   }
   
+  // Load sales data
+  const loadSalesData = async () => {
+    try {
+      const response = await fetch('/api/sales')
+      if (response.ok) {
+        const data = await response.json()
+        setSalesStats(data.salesStats)
+      }
+    } catch (error) {
+      console.error('Error loading sales data:', error)
+    }
+  }
+
   // Load portfolio on component mount
   useEffect(() => {
     loadPortfolio()
+    loadSalesData()
   }, [])
   
   // Helper function to get category color
@@ -170,6 +186,16 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           >
             Billån
           </button>
+          <button
+            onClick={() => setActiveTab('sales')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'sales'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Salg af Ting
+          </button>
         </nav>
       </div>
 
@@ -177,7 +203,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
       {activeTab === 'stocks' ? (
         <div className="space-y-6">
           {/* Stock Portfolio Overview */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -229,6 +255,22 @@ export default function FinanceView({ mode }: FinanceViewProps) {
                     {lastUpdated ? lastUpdated.toLocaleTimeString('da-DK') : 'Aldrig'}
                   </p>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Sales Overview Card */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <TrendingUp className="h-8 w-8 text-green-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total Salg</p>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {salesStats.totalSales.toLocaleString('da-DK')} DKK
+                </p>
+                <p className="text-xs text-gray-500">{salesStats.totalItems} solgte varer</p>
               </div>
             </div>
           </div>
@@ -329,8 +371,10 @@ export default function FinanceView({ mode }: FinanceViewProps) {
             )}
           </div>
         </div>
-      ) : (
+      ) : activeTab === 'car-loans' ? (
         <CarLoanView />
+      ) : (
+        <SalesView />
       )}
     </div>
   )

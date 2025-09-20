@@ -224,6 +224,176 @@ export class DatabaseService {
     if (error) throw error
     return data
   }
+
+  // Car Loans
+  static async saveCarLoan(userId: string, loanData: any) {
+    const { data, error } = await supabase
+      .from('car_loans')
+      .insert([{ user_id: userId, ...loanData }])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
+  static async getCarLoans(userId: string) {
+    const { data, error } = await supabase
+      .from('car_loans')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data
+  }
+
+  static async updateCarLoan(userId: string, loanId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('car_loans')
+      .update(updates)
+      .eq('id', loanId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
+  static async deleteCarLoan(userId: string, loanId: string) {
+    const { error } = await supabase
+      .from('car_loans')
+      .delete()
+      .eq('id', loanId)
+      .eq('user_id', userId)
+    
+    if (error) throw error
+  }
+
+  // Car Loan Payments
+  static async saveCarLoanPayment(userId: string, paymentData: any) {
+    const { data, error } = await supabase
+      .from('car_loan_payments')
+      .insert([{ user_id: userId, ...paymentData }])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
+  static async getCarLoanPayments(userId: string, loanId?: string) {
+    let query = supabase
+      .from('car_loan_payments')
+      .select('*')
+      .eq('user_id', userId)
+      .order('payment_date', { ascending: false })
+    
+    if (loanId) {
+      query = query.eq('car_loan_id', loanId)
+    }
+    
+    const { data, error } = await query
+    if (error) throw error
+    return data
+  }
+
+  static async updateCarLoanPayment(userId: string, paymentId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('car_loan_payments')
+      .update(updates)
+      .eq('id', paymentId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
+  static async deleteCarLoanPayment(userId: string, paymentId: string) {
+    const { error } = await supabase
+      .from('car_loan_payments')
+      .delete()
+      .eq('id', paymentId)
+      .eq('user_id', userId)
+    
+    if (error) throw error
+  }
+
+  // Sales Items
+  static async saveSalesItem(userId: string, salesData: any) {
+    const { data, error } = await supabase
+      .from('sales_items')
+      .insert([{ user_id: userId, ...salesData }])
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
+  static async getSalesItems(userId: string) {
+    const { data, error } = await supabase
+      .from('sales_items')
+      .select('*')
+      .eq('user_id', userId)
+      .order('sale_date', { ascending: false })
+    
+    if (error) throw error
+    return data
+  }
+
+  static async updateSalesItem(userId: string, itemId: string, updates: any) {
+    const { data, error } = await supabase
+      .from('sales_items')
+      .update(updates)
+      .eq('id', itemId)
+      .eq('user_id', userId)
+      .select()
+      .single()
+    
+    if (error) throw error
+    return data
+  }
+
+  static async deleteSalesItem(userId: string, itemId: string) {
+    const { error } = await supabase
+      .from('sales_items')
+      .delete()
+      .eq('id', itemId)
+      .eq('user_id', userId)
+    
+    if (error) throw error
+  }
+
+  static async getSalesStats(userId: string) {
+    const { data, error } = await supabase
+      .from('sales_items')
+      .select('sale_price, sale_date, sale_platform')
+      .eq('user_id', userId)
+    
+    if (error) throw error
+    
+    const totalSales = data?.reduce((sum, item) => sum + parseFloat(item.sale_price), 0) || 0
+    const totalItems = data?.length || 0
+    const platforms = [...new Set(data?.map(item => item.sale_platform) || [])]
+    
+    // Calculate monthly sales
+    const monthlySales = data?.reduce((acc, item) => {
+      const month = new Date(item.sale_date).toISOString().slice(0, 7) // YYYY-MM
+      acc[month] = (acc[month] || 0) + parseFloat(item.sale_price)
+      return acc
+    }, {} as Record<string, number>) || {}
+    
+    return {
+      totalSales,
+      totalItems,
+      platforms,
+      monthlySales
+    }
+  }
 }
 
 export default DatabaseService

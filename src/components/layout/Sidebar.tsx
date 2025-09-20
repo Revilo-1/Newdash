@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { 
   LayoutDashboard, 
   Users, 
@@ -25,6 +25,8 @@ const getNavigation = (t: any, isAdmin: boolean = false) => [
   { name: t.navigation.tasks, href: '/tasks', icon: Target },
   { name: t.navigation.healthWellness, href: '/health-wellness', icon: Heart, privateOnly: true },
   { name: t.navigation.finance, href: '/finance', icon: CreditCard, privateOnly: true },
+  // Child page under Finance → Finance with tab pre-selected
+  { name: 'Salg af ting', href: '/finance?tab=sales', icon: CreditCard, privateOnly: true, childOf: '/finance' },
   ...(isAdmin ? [{ name: t.navigation.users, href: '/users', icon: Users, adminOnly: true }] : []),
   { name: t.navigation.aiIntegration, href: '/ai', icon: Zap },
   { name: t.navigation.api, href: '/api', icon: Key },
@@ -44,6 +46,7 @@ export default function Sidebar({ dashboardMode = 'private' }: SidebarProps) {
   const { t } = useLanguage()
   const { isAdmin } = useAdmin()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const navigation = getNavigation(t, isAdmin)
   const others = getOthers(t)
 
@@ -81,7 +84,14 @@ export default function Sidebar({ dashboardMode = 'private' }: SidebarProps) {
                     return null
                   }
                   
-                  const isActive = pathname === item.href
+                  // Active state supports child items with query params (e.g., /finance?tab=sales)
+                  let isActive = pathname === item.href
+                  if (!isActive && item.href.startsWith('/finance?tab=')) {
+                    const currentTab = searchParams?.get('tab')
+                    const itemTab = item.href.split('tab=')[1]
+                    isActive = pathname === '/finance' && currentTab === itemTab
+                  }
+                  const isChild = Boolean((item as any).childOf)
                   return (
                     <Link
                       key={item.name}
@@ -90,7 +100,7 @@ export default function Sidebar({ dashboardMode = 'private' }: SidebarProps) {
                         isActive
                           ? 'bg-purple-50 border-purple-200 text-purple-700'
                           : 'border-transparent text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      } group flex items-center px-3 py-2 text-sm font-medium border-l-4 transition-colors duration-200 rounded-r-md`}
+                      } group flex items-center px-3 py-2 text-sm font-medium border-l-4 transition-colors duration-200 rounded-r-md ${isChild ? 'ml-6' : ''}`}
                     >
                       <item.icon
                         className={`${
