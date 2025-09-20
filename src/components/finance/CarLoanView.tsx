@@ -12,7 +12,8 @@ import {
   Trash2,
   CreditCard,
   Clock,
-  Target
+  Target,
+  Settings
 } from 'lucide-react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts'
 
@@ -44,11 +45,14 @@ export default function CarLoanView() {
   const [paymentHistory, setPaymentHistory] = useState<PaymentHistory[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [editingLoan, setEditingLoan] = useState<CarLoan | null>(null)
   const [loading, setLoading] = useState(true)
   const [paymentAmount, setPaymentAmount] = useState('')
   const [paymentDate, setPaymentDate] = useState('')
   const [isExtraPayment, setIsExtraPayment] = useState(false)
+  const [loanAmount, setLoanAmount] = useState('')
+  const [interestRate, setInterestRate] = useState('')
 
   // Mock data for demonstration
   useEffect(() => {
@@ -173,6 +177,40 @@ export default function CarLoanView() {
     alert('Månedlig betaling opdateret!')
   }
 
+  const handleOpenSettings = () => {
+    if (carLoans.length > 0) {
+      setLoanAmount(carLoans[0].loanAmount.toString())
+      setInterestRate(carLoans[0].interestRate.toString())
+    }
+    setShowSettingsModal(true)
+  }
+
+  const handleSaveSettings = () => {
+    if (!loanAmount || !interestRate) {
+      alert('Udfyld venligst alle felter')
+      return
+    }
+
+    const newLoanAmount = parseFloat(loanAmount)
+    const newInterestRate = parseFloat(interestRate)
+
+    if (isNaN(newLoanAmount) || isNaN(newInterestRate)) {
+      alert('Indtast venligst gyldige tal')
+      return
+    }
+
+    setCarLoans(prev => prev.map(loan => ({
+      ...loan,
+      loanAmount: newLoanAmount,
+      interestRate: newInterestRate
+    })))
+
+    setShowSettingsModal(false)
+    setLoanAmount('')
+    setInterestRate('')
+    alert('Indstillinger gemt!')
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -189,13 +227,22 @@ export default function CarLoanView() {
           <h2 className="text-2xl font-bold text-gray-900">Billån Oversigt</h2>
           <p className="text-gray-600">Administrer dine billån og se betalingsstatus</p>
         </div>
-        <button
-          onClick={() => setShowPaymentModal(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Tilføj Indbetaling
-        </button>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handleOpenSettings}
+            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            title="Indstillinger"
+          >
+            <Settings className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => setShowPaymentModal(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Tilføj Indbetaling
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -532,6 +579,78 @@ export default function CarLoanView() {
                   className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   Registrer Indbetaling
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h3 className="text-lg font-semibold text-gray-900">Lån Indstillinger</h3>
+              <button 
+                onClick={() => {
+                  setShowSettingsModal(false)
+                  setLoanAmount('')
+                  setInterestRate('')
+                }}
+                className="p-1 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Loan Amount */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Samlet Lånebeløb (DKK)
+                </label>
+                <input
+                  type="number"
+                  value={loanAmount}
+                  onChange={(e) => setLoanAmount(e.target.value)}
+                  placeholder="F.eks. 450000"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Interest Rate */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rente (%)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={interestRate}
+                  onChange={(e) => setInterestRate(e.target.value)}
+                  placeholder="F.eks. 4.5"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex space-x-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowSettingsModal(false)
+                    setLoanAmount('')
+                    setInterestRate('')
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Annuller
+                </button>
+                <button
+                  onClick={handleSaveSettings}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  Gem Indstillinger
                 </button>
               </div>
             </div>

@@ -143,16 +143,7 @@ export default function FinanceView({ mode }: FinanceViewProps) {
           <p className="text-gray-600">Administrer dine aktier og billån</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-            <Search className="h-5 w-5" />
-          </button>
-          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-            <Bell className="h-5 w-5" />
-          </button>
-          <button className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-            <Plus className="h-4 w-4 mr-2" />
-            Tilføj Transaktion
-          </button>
+          {/* Settings icon will be added in CarLoanView */}
         </div>
       </div>
 
