@@ -1,4 +1,13 @@
 import { supabase } from './supabaseClient'
+import { createClient } from '@supabase/supabase-js'
+
+// Server-side admin client (bypasses RLS) used from API routes
+const supabaseAdmin = (typeof process !== 'undefined' && process.env.SUPABASE_SERVICE_ROLE_KEY)
+  ? createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL as string,
+      process.env.SUPABASE_SERVICE_ROLE_KEY as string
+    )
+  : undefined
 
 // Database service for MyDashboard
 export class DatabaseService {
@@ -325,7 +334,8 @@ export class DatabaseService {
   // Sales Items
   static async saveSalesItem(userId: string, salesData: any) {
     // First attempt: insert with all provided fields (new schema)
-    let { data, error } = await supabase
+    const writeClient = supabaseAdmin ?? supabase
+    let { data, error } = await writeClient
       .from('sales_items')
       .insert([{ user_id: userId, ...salesData }])
       .select()
@@ -343,7 +353,7 @@ export class DatabaseService {
       if (salesData.sold_for) legacyRow.sold_for = salesData.sold_for
 
       // Try legacy insert
-      let retry = await supabase
+      let retry = await writeClient
         .from('sales_items')
         .insert([{ user_id: userId, ...legacyRow }])
         .select()
@@ -352,7 +362,7 @@ export class DatabaseService {
       // If legacy insert fails due to sold_for not existing, try without it
       if (retry.error && typeof retry.error.message === 'string' && retry.error.message.includes('sold_for')) {
         const { sold_for, ...withoutSoldFor } = legacyRow
-        retry = await supabase
+        retry = await writeClient
           .from('sales_items')
           .insert([{ user_id: userId, ...withoutSoldFor }])
           .select()
@@ -367,7 +377,8 @@ export class DatabaseService {
   }
 
   static async getSalesItems(userId: string) {
-    const { data, error } = await supabase
+    const client = supabaseAdmin ?? supabase
+    const { data, error } = await client
       .from('sales_items')
       .select('*')
       .eq('user_id', userId)
@@ -378,7 +389,8 @@ export class DatabaseService {
   }
 
   static async updateSalesItem(userId: string, itemId: string, updates: any) {
-    const { data, error } = await supabase
+    const client = supabaseAdmin ?? supabase
+    const { data, error } = await client
       .from('sales_items')
       .update(updates)
       .eq('id', itemId)
@@ -391,7 +403,8 @@ export class DatabaseService {
   }
 
   static async deleteSalesItem(userId: string, itemId: string) {
-    const { error } = await supabase
+    const client = supabaseAdmin ?? supabase
+    const { error } = await client
       .from('sales_items')
       .delete()
       .eq('id', itemId)
@@ -401,7 +414,8 @@ export class DatabaseService {
   }
 
   static async getSalesStats(userId: string) {
-    const { data, error } = await supabase
+    const client = supabaseAdmin ?? supabase
+    const { data, error } = await client
       .from('sales_items')
       .select('sale_price, sale_date, sale_platform, sold_for')
       .eq('user_id', userId)

@@ -25,6 +25,7 @@ const getNavigation = (t: any, isAdmin: boolean = false) => [
   { name: t.navigation.tasks, href: '/tasks', icon: Target },
   { name: t.navigation.healthWellness, href: '/health-wellness', icon: Heart, privateOnly: true },
   { name: t.navigation.finance, href: '/finance', icon: CreditCard, privateOnly: true },
+  { name: 'Tilføj Salg', href: '/finance/sales/new', icon: CreditCard, privateOnly: true, childOf: '/finance' },
   // Child page under Finance → Finance with tab pre-selected
   { name: 'Salg af ting', href: '/finance?tab=sales', icon: CreditCard, privateOnly: true, childOf: '/finance' },
   ...(isAdmin ? [{ name: t.navigation.users, href: '/users', icon: Users, adminOnly: true }] : []),
